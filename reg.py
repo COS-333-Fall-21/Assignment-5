@@ -1,4 +1,15 @@
 # reg.py
+from sys import exit, argv
+from PyQt5.QtWidgets import (
+    QApplication,
+    QFrame,
+    QLabel,
+    QMainWindow,
+    QGridLayout,
+    QDesktopWidget,
+)
+from PyQt5.QtCore import Qt
+
 dummy_rows = [
     (8291, "COS", "116", "ST", "The Computational Universe"),
     (8292, "COS", "126", "QR", "General Computer Science"),
@@ -92,3 +103,34 @@ dummy_rows = [
         "Advanced Topics in Computer Science: Formal Methods in Networking",
     ),
 ]
+
+
+def setLayout():
+    label = QLabel("Hello, World!")
+    label.setAlignment(Qt.AlignCenter)
+
+    layout = QGridLayout()
+    layout.addWidget(label, 0, 0)
+
+    return layout
+
+
+def main():
+    app = QApplication(argv)
+
+    layout = setLayout()
+    frame = QFrame()
+    frame.setLayout(layout)
+
+    window = QMainWindow()
+    window.setWindowTitle("Princeton University Class Search")
+    window.setCentralWidget(frame)
+    screen_size = QDesktopWidget().screenGeometry()
+    window.resize(screen_size.width() // 2, screen_size.height())
+
+    window.show()
+    exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
