@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QListWidget,
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
 dummy_rows = [
     (8291, "COS", "116", "ST", "The Computational Universe"),
@@ -109,7 +110,6 @@ dummy_rows = [
 
 
 def row_to_string(row):
-    print(row)
     str_rep = ""
     # Max widths of each column (class Id, Dept, Number, Area)
     max_widths = [5, 4, 5, 4]
@@ -130,6 +130,8 @@ def row_to_string(row):
 
 def create_list_widget():
     list_widget = QListWidget()
+
+    list_widget.setFont(QFont("courier", 10))
 
     i = 0
     for row in dummy_rows:
