@@ -1,5 +1,5 @@
 # reg.py
-from sys import exit, argv
+from sys import exit, argv, stderr
 from PyQt5.QtWidgets import (
     QApplication,
     QFrame,
@@ -10,9 +10,26 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLineEdit,
     QListWidget,
+    QMessageBox,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+from socket import socket
+from pickle import load, dump
+
+ID_INDEX = 1
+DAYS_INDEX = 2
+START_INDEX = 3
+END_INDEX = 4
+BLD_INDEX = 5
+ROOM_INDEX = 6
+DEPT_INDEX = 8
+NUM_INDEX = 9
+AREA_INDEX = 11
+TITLE_INDEX = 12
+DESCRIPT_INDEX = 13
+PREREQ_INDEX = 14
+PROF_INDEX = 18
 
 dummy_rows = [
     (8291, "COS", "116", "ST", "The Computational Universe"),
@@ -108,6 +125,51 @@ dummy_rows = [
     ),
 ]
 
+dummy_details = [
+    (
+        8292,
+        3668,
+        "TTh",
+        "10:00 AM",
+        "10:50 AM",
+        "FRIEN",
+        "101",
+        3668,
+        "COS",
+        "126",
+        3668,
+        "QR",
+        "General Computer Science",
+        "An introduction to computer science in the context of scientific, engineering, and commercial applications. The goal of the course is to teach basic principles and practical issues, while at the same time preparing students to use computers effectively for applications in computer science, physics, biology, chemistry, engineering, and other disciplines. Topics include: hardware and software systems; programming in Java; algorithms and data structures; fundamental principles of computation; and scientific computing, including simulation, optimization, and data analysis. Two lectures, two precepts.",
+        "",
+        3668,
+        313,
+        313,
+        "Larry L. Peterson",
+    ),
+    (
+        8292,
+        3668,
+        "TTh",
+        "10:00 AM",
+        "10:50 AM",
+        "FRIEN",
+        "101",
+        3668,
+        "EGR",
+        "126",
+        3668,
+        "QR",
+        "General Computer Science",
+        "An introduction to computer science in the context of scientific, engineering, and commercial applications. The goal of the course is to teach basic principles and practical issues, while at the same time preparing students to use computers effectively for applications in computer science, physics, biology, chemistry, engineering, and other disciplines. Topics include: hardware and software systems; programming in Java; algorithms and data structures; fundamental principles of computation; and scientific computing, including simulation, optimization, and data analysis. Two lectures, two precepts.",
+        "",
+        3668,
+        313,
+        313,
+        "Larry L. Peterson",
+    ),
+]
+
 
 def row_to_string(row):
     str_rep = ""
@@ -140,8 +202,55 @@ def create_list_widget():
     return list_widget
 
 
+def get_details(class_id):
+    try:
+        host = argv[1]
+        port = int(argv[2])
+        with socket() as sock:
+            sock.connect((host, port))
+
+            out_flo = sock.makefile(mode="wb")
+            dump(class_id, out_flo)
+            out_flo.flush()
+
+            in_flo = sock.makefile(mode="rb")
+            details = load(in_flo)
+            in_flo.close()
+
+        print(details)
+        return details
+
+    except Exception as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        exit(1)
+
+
 # 5 rows by 3 columns
-def setLayout():
+def setLayout(window):
+    def submit_button_slot():
+        print("Dept:", dept_edit.text())
+        print("Num:", num_edit.text())
+        print("Area:", area_edit.text())
+        print("Title:", title_edit.text())
+        # I think we should pass this info as a dict
+
+    def list_click_slot():
+        class_id = format_class_id()
+        # TODO: Add data to this
+        results = get_details(class_id)
+        message = format_results(results)
+        #   print("Message:", message)
+        QMessageBox.information(window, "Class Details", message)
+
+    def format_class_id():
+        class_id = list_widget.currentItem().text()
+        if class_id[0] == " ":
+            class_id = str(class_id[1:4])
+        else:
+            class_id = str(class_id[:4])
+        print("Fetching info for class " + class_id + "...")
+        return class_id
+
     dept_label = QLabel("Dept:")
     num_label = QLabel("Number:")
     area_label = QLabel("Area:")
@@ -152,17 +261,11 @@ def setLayout():
     area_edit = QLineEdit()
     title_edit = QLineEdit()
 
-    def submit_button_slot():
-        print("Dept:", dept_edit.text())
-        print("Num:", num_edit.text())
-        print("Area:", area_edit.text())
-        print("Title:", title_edit.text())
-        # I think we should pass this info as a dict
+    list_widget = create_list_widget()
 
     submit_button = QPushButton("Submit")
     submit_button.clicked.connect(submit_button_slot)
-
-    list_widget = create_list_widget()
+    list_widget.clicked.connect(list_click_slot)
 
     layout = QGridLayout()
 
@@ -183,14 +286,82 @@ def setLayout():
     return layout
 
 
+def format_results(results):
+    #  def wrap(wrapper, string):
+    #      desc_list = wrapper.wrap(text=string)
+    #      frmtd_row = desc_list[0]
+    #      if len(desc_list) > 1:
+    #          for i in range(len(desc_list) - 1):
+    #              frmtd_row += "\n" + desc_list[i + 1]
+    #      return frmtd_row
+
+    #  wrapper = textwrap.TextWrapper(width=DEFAULT_WIDTH)
+
+    result = results[0]
+
+    message = ""
+
+    message += "Course Id:" + str(result[ID_INDEX]) + "\n"
+    message += "\n"
+    message += "Days:" + result[DAYS_INDEX] + "\n"
+    message += "Start time:" + result[START_INDEX] + "\n"
+    message += "End time:" + result[END_INDEX] + "\n"
+    message += "Building:" + result[BLD_INDEX] + "\n"
+    message += "Room:" + result[ROOM_INDEX] + "\n"
+    message += "\n"
+
+    # print every crosslisted dept/number
+    for listing in results:
+        message += "Dept and Number:" + listing[DEPT_INDEX] + listing[NUM_INDEX] + "\n"
+    message += "\n"
+
+    message += "Area:" + result[AREA_INDEX] + "\n"
+    message += "\n"
+
+    # print a wrapped title
+    #  frmtd_row = wrap(wrapper, "Title: " + result[TITLE_INDEX])
+    #  print(frmtd_row)
+    message += "Title: " + result[TITLE_INDEX] + "\n"
+    message += "\n"
+
+    # print a wrapped description
+    #  frmtd_row = wrap(wrapper, "Description: " + result[DESCRIPT_INDEX])
+    #  print(frmtd_row)
+    message += "Description: " + result[DESCRIPT_INDEX] + "\n"
+    message += "\n"
+
+    # print a wrapped set of prerequisites
+    if result[PREREQ_INDEX] != "":
+        #   frmtd_row = wrap(wrapper, "Prerequisites: " + result[PREREQ_INDEX])
+        #   print(frmtd_row)
+        message += "Prerequisites: " + result[PREREQ_INDEX] + "\n"
+    else:
+        message += "Prerequisites:" + "\n"
+
+    if len(result) > PROF_INDEX:
+        message += "\n"
+        more_profs = True
+        i = PROF_INDEX
+        while more_profs:
+            message += "Professor:" + result[i] + "\n"
+            i += 1
+            if len(result) <= i:
+                more_profs = False
+
+    return message
+
+
 def main():
+    if len(argv) != 3:
+        print("Usage: python %s host port", argv[0])
     app = QApplication(argv)
 
-    layout = setLayout()
+    window = QMainWindow()
+
+    layout = setLayout(window)
     frame = QFrame()
     frame.setLayout(layout)
 
-    window = QMainWindow()
     window.setWindowTitle("Princeton University Class Search")
     window.setCentralWidget(frame)
     screen_size = QDesktopWidget().screenGeometry()
