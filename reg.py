@@ -152,7 +152,15 @@ def setLayout():
     area_edit = QLineEdit()
     title_edit = QLineEdit()
 
+    def submit_button_slot():
+        print("Dept:", dept_edit.text())
+        print("Num:", num_edit.text())
+        print("Area:", area_edit.text())
+        print("Title:", title_edit.text())
+        # I think we should pass this info as a dict
+
     submit_button = QPushButton("Submit")
+    submit_button.clicked.connect(submit_button_slot)
 
     list_widget = create_list_widget()
 
