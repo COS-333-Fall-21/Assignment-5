@@ -190,16 +190,40 @@ def row_to_string(row):
     return str_rep
 
 
-def create_list_widget():
+def create_list_widget(rows):
     list_widget = QListWidget()
 
     list_widget.setFont(QFont("courier", 10))
 
     i = 0
-    for row in dummy_rows:
+    for row in rows:
         list_widget.insertItem(i, row_to_string(row))
         i = i + 1
     return list_widget
+
+
+# Sends a dict to the server with class info; returns a list of row tuples
+def get_classes(class_info):
+    try:
+        host = argv[1]
+        port = int(argv[2])
+        with socket() as sock:
+            sock.connect((host, port))
+
+            out_flo = sock.makefile(mode="wb")
+            dump(class_info, out_flo)
+            out_flo.flush()
+
+            in_flo = sock.makefile(mode="rb")
+            details = load(in_flo)
+            in_flo.close()
+
+        print(details)
+        return details
+
+    except Exception as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        exit(1)
 
 
 def get_details(class_id):
@@ -227,12 +251,16 @@ def get_details(class_id):
 
 # 5 rows by 3 columns
 def setLayout(window):
+    list_fill_info = []
+
     def submit_button_slot():
-        print("Dept:", dept_edit.text())
-        print("Num:", num_edit.text())
-        print("Area:", area_edit.text())
-        print("Title:", title_edit.text())
-        # I think we should pass this info as a dict
+        class_info = {
+            "dept": dept_edit.text(),
+            "num": num_edit.text(),
+            "area": area_edit.text(),
+            "title": title_edit.text(),
+        }
+        list_fill_info = get_classes(class_info)
 
     def list_click_slot():
         class_id = format_class_id()
@@ -261,7 +289,7 @@ def setLayout(window):
     area_edit = QLineEdit()
     title_edit = QLineEdit()
 
-    list_widget = create_list_widget()
+    list_widget = create_list_widget(list_fill_info)
 
     submit_button = QPushButton("Submit")
     submit_button.clicked.connect(submit_button_slot)
