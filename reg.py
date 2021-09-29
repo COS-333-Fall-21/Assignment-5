@@ -275,23 +275,18 @@ def setLayout(window):
 
     # Function for when a list item is doulbe clicked (or equivalent)
     def list_click_slot():
-        # Function to format a class Id in the way we want
-        def format_class_id():
-            class_id = list_widget.currentItem().text()
-            if class_id[0] == " ":
-                class_id = str(class_id[1:4])
-            else:
-                class_id = str(class_id[:4])
-            print("Fetching info for class " + class_id + "...")
-            return class_id
-
-        class_id = format_class_id()
+        # Format a class Id to be a string with no leading or trailing whitespace
+        class_id = list_widget.currentItem().text()
+        if class_id[0] == " ":
+            class_id = str(class_id[1:4])
+        else:
+            class_id = str(class_id[:4])
 
         #   results = dummy_details
         results = get_details(class_id)
         message = format_results(results)
 
-        #   print("Message:", message)
+        #   Activate the dialogue box with the appropriate detail
         QMessageBox.information(window, "Class Details", message)
 
     # Add a list widget to the layout
@@ -310,7 +305,7 @@ def setLayout(window):
     area_label = QLabel("Area:")
     title_label = QLabel("Title:")
 
-    # Create the four input fields
+    # Create the four input fields & connect them to the submit function
     dept_edit = QLineEdit()
     dept_edit.returnPressed.connect(submit_button_slot)
     num_edit = QLineEdit()
