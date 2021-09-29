@@ -134,8 +134,8 @@ def handle_client(sock):
 
 def main():
     # TODO: Actually handle this correctly using ArgParse
-    if len(argv) != 3:
-        print("Usage: python %s host port", argv[0])
+    if len(argv) != 2:
+        print("Usage: python %s port", argv[0])
         exit(1)
     
     try:
