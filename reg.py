@@ -228,7 +228,7 @@ def get_classes(class_info):
         return details
 
     except Exception as ex:
-        print("%s: " % argv[0], ex, file=stderr)
+        print(ex, file=stderr)
         exit(1)
 
 
