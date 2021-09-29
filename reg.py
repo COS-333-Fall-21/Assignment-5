@@ -251,7 +251,7 @@ def get_details(class_id):
 
 # 5 rows by 3 columns
 def setLayout(window):
-    list_fill_info = []
+    list_fill_info = dummy_rows
 
     def submit_button_slot():
         class_info = {
@@ -260,12 +260,16 @@ def setLayout(window):
             "area": area_edit.text(),
             "title": title_edit.text(),
         }
-        list_fill_info = get_classes(class_info)
+        #   list_fill_info = get_classes(class_info)
+        list_fill_info = []
+        list_widget = create_list_widget(list_fill_info)
+        add_list_widget(layout, list_widget)
 
     def list_click_slot():
         class_id = format_class_id()
         # TODO: Add data to this
-        results = get_details(class_id)
+        #   results = get_details(class_id)
+        results = dummy_details
         message = format_results(results)
         #   print("Message:", message)
         QMessageBox.information(window, "Class Details", message)
@@ -279,21 +283,28 @@ def setLayout(window):
         print("Fetching info for class " + class_id + "...")
         return class_id
 
+    def add_list_widget(layout, list_widget):
+        layout.addWidget(list_widget, 4, 0, 1, 3)
+
     dept_label = QLabel("Dept:")
     num_label = QLabel("Number:")
     area_label = QLabel("Area:")
     title_label = QLabel("Title:")
 
     dept_edit = QLineEdit()
+    dept_edit.returnPressed.connect(submit_button_slot)
     num_edit = QLineEdit()
+    num_edit.returnPressed.connect(submit_button_slot)
     area_edit = QLineEdit()
+    area_edit.returnPressed.connect(submit_button_slot)
     title_edit = QLineEdit()
+    title_edit.returnPressed.connect(submit_button_slot)
 
     list_widget = create_list_widget(list_fill_info)
+    list_widget.activated.connect(list_click_slot)
 
     submit_button = QPushButton("Submit")
     submit_button.clicked.connect(submit_button_slot)
-    list_widget.clicked.connect(list_click_slot)
 
     layout = QGridLayout()
 
@@ -309,7 +320,7 @@ def setLayout(window):
 
     layout.addWidget(submit_button, 0, 2, 4, 1)
 
-    layout.addWidget(list_widget, 4, 0, 1, 3)
+    add_list_widget(layout, list_widget)
 
     return layout
 
@@ -382,6 +393,8 @@ def format_results(results):
 def main():
     if len(argv) != 3:
         print("Usage: python %s host port", argv[0])
+        exit(1)
+
     app = QApplication(argv)
 
     window = QMainWindow()
