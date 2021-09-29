@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QGridLayout,
     QDesktopWidget,
+    QPushButton,
+    QLineEdit,
+    QListWidget,
 )
 from PyQt5.QtCore import Qt
 
@@ -105,12 +108,67 @@ dummy_rows = [
 ]
 
 
+def row_to_string(row):
+    print(row)
+    str_rep = ""
+    # Max widths of each column (class Id, Dept, Number, Area)
+    max_widths = [5, 4, 5, 4]
+
+    # Join the first four with the appropriate number of spaces
+    for i in range(len(row) - 1):
+        str_col = str(row[i])
+        num_spaces = max_widths[i] - len(str_col)
+        str_rep += "".join([" "] * num_spaces)
+        str_rep += "".join(str_col)
+
+    # Join the title
+    str_rep += "".join(" ")
+    str_rep += "".join(row[len(row) - 1])
+
+    return str_rep
+
+
+def create_list_widget():
+    list_widget = QListWidget()
+
+    i = 0
+    for row in dummy_rows:
+        list_widget.insertItem(i, row_to_string(row))
+        i = i + 1
+    return list_widget
+
+
+# 5 rows by 3 columns
 def setLayout():
-    label = QLabel("Hello, World!")
-    label.setAlignment(Qt.AlignCenter)
+    dept_label = QLabel("Dept:")
+    num_label = QLabel("Number:")
+    area_label = QLabel("Area:")
+    title_label = QLabel("Title:")
+
+    dept_edit = QLineEdit()
+    num_edit = QLineEdit()
+    area_edit = QLineEdit()
+    title_edit = QLineEdit()
+
+    submit_button = QPushButton("Submit")
+
+    list_widget = create_list_widget()
 
     layout = QGridLayout()
-    layout.addWidget(label, 0, 0)
+
+    layout.addWidget(dept_label, 0, 0, 1, 1)
+    layout.addWidget(num_label, 1, 0, 1, 1)
+    layout.addWidget(area_label, 2, 0, 1, 1)
+    layout.addWidget(title_label, 3, 0, 1, 1)
+
+    layout.addWidget(dept_edit, 0, 1, 1, 1)
+    layout.addWidget(num_edit, 1, 1, 1, 1)
+    layout.addWidget(area_edit, 2, 1, 1, 1)
+    layout.addWidget(title_edit, 3, 1, 1, 1)
+
+    layout.addWidget(submit_button, 0, 2, 4, 1)
+
+    layout.addWidget(list_widget, 4, 0, 1, 3)
 
     return layout
 
