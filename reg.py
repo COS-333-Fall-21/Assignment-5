@@ -17,6 +17,7 @@ from PyQt5.QtGui import QFont
 from socket import socket
 from pickle import load, dump
 
+# Constants for formatting class details
 ID_INDEX = 1
 DAYS_INDEX = 2
 START_INDEX = 3
@@ -31,6 +32,7 @@ DESCRIPT_INDEX = 13
 PREREQ_INDEX = 14
 PROF_INDEX = 18
 
+# Dummy row data for testing
 dummy_rows = [
     (8291, "COS", "116", "ST", "The Computational Universe"),
     (8292, "COS", "126", "QR", "General Computer Science"),
@@ -125,6 +127,7 @@ dummy_rows = [
     ),
 ]
 
+# Dummy detail data for testing
 dummy_details = [
     (
         8292,
@@ -170,7 +173,7 @@ dummy_details = [
     ),
 ]
 
-
+# Convert a row tuple to a string to print to the list widget
 def row_to_string(row):
     str_rep = ""
     # Max widths of each column (class Id, Dept, Number, Area)
@@ -190,6 +193,7 @@ def row_to_string(row):
     return str_rep
 
 
+# Create a list widget from the given rows
 def create_list_widget(rows):
     list_widget = QListWidget()
 
@@ -210,10 +214,12 @@ def get_classes(class_info):
         with socket() as sock:
             sock.connect((host, port))
 
+            # Send the class info dict to the server
             out_flo = sock.makefile(mode="wb")
             dump(class_info, out_flo)
             out_flo.flush()
 
+            # Read the list of rows from the server
             in_flo = sock.makefile(mode="rb")
             details = load(in_flo)
             in_flo.close()
@@ -226,6 +232,7 @@ def get_classes(class_info):
         exit(1)
 
 
+# Sends the class Id to the serverl returns a list of tuples representing class details
 def get_details(class_id):
     try:
         host = argv[1]
@@ -233,10 +240,12 @@ def get_details(class_id):
         with socket() as sock:
             sock.connect((host, port))
 
+            # Send the class Id to the server
             out_flo = sock.makefile(mode="wb")
             dump(class_id, out_flo)
             out_flo.flush()
 
+            # Read the list of tuples from the server
             in_flo = sock.makefile(mode="rb")
             details = load(in_flo)
             in_flo.close()
@@ -251,8 +260,7 @@ def get_details(class_id):
 
 # 5 rows by 3 columns
 def setLayout(window):
-    list_fill_info = dummy_rows
-
+    # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
         class_info = {
             "dept": dept_edit.text(),
@@ -265,32 +273,44 @@ def setLayout(window):
         list_widget = create_list_widget(list_fill_info)
         add_list_widget(layout, list_widget)
 
+    # Function for when a list item is doulbe clicked (or equivalent)
     def list_click_slot():
+        # Function to format a class Id in the way we want
+        def format_class_id():
+            class_id = list_widget.currentItem().text()
+            if class_id[0] == " ":
+                class_id = str(class_id[1:4])
+            else:
+                class_id = str(class_id[:4])
+            print("Fetching info for class " + class_id + "...")
+            return class_id
+
         class_id = format_class_id()
-        # TODO: Add data to this
-        #   results = get_details(class_id)
-        results = dummy_details
+
+        #   results = dummy_details
+        results = get_details(class_id)
         message = format_results(results)
+
         #   print("Message:", message)
         QMessageBox.information(window, "Class Details", message)
 
-    def format_class_id():
-        class_id = list_widget.currentItem().text()
-        if class_id[0] == " ":
-            class_id = str(class_id[1:4])
-        else:
-            class_id = str(class_id[:4])
-        print("Fetching info for class " + class_id + "...")
-        return class_id
-
+    # Add a list widget to the layout
     def add_list_widget(layout, list_widget):
         layout.addWidget(list_widget, 4, 0, 1, 3)
 
+    # Start by filling the widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_fill_info = []
+    submit_button_slot()
+
+    # Create the four input labels
     dept_label = QLabel("Dept:")
     num_label = QLabel("Number:")
     area_label = QLabel("Area:")
     title_label = QLabel("Title:")
 
+    # Create the four input fields
     dept_edit = QLineEdit()
     dept_edit.returnPressed.connect(submit_button_slot)
     num_edit = QLineEdit()
@@ -300,12 +320,15 @@ def setLayout(window):
     title_edit = QLineEdit()
     title_edit.returnPressed.connect(submit_button_slot)
 
+    # create the list widget
     list_widget = create_list_widget(list_fill_info)
     list_widget.activated.connect(list_click_slot)
 
+    # Create the submit button
     submit_button = QPushButton("Submit")
     submit_button.clicked.connect(submit_button_slot)
 
+    # Create the layout
     layout = QGridLayout()
 
     layout.addWidget(dept_label, 0, 0, 1, 1)
@@ -325,21 +348,13 @@ def setLayout(window):
     return layout
 
 
+# Format the class details in the proper way
 def format_results(results):
-    #  def wrap(wrapper, string):
-    #      desc_list = wrapper.wrap(text=string)
-    #      frmtd_row = desc_list[0]
-    #      if len(desc_list) > 1:
-    #          for i in range(len(desc_list) - 1):
-    #              frmtd_row += "\n" + desc_list[i + 1]
-    #      return frmtd_row
-
-    #  wrapper = textwrap.TextWrapper(width=DEFAULT_WIDTH)
-
     result = results[0]
 
     message = ""
 
+    # Add the first fields to the message
     message += "Course Id:" + str(result[ID_INDEX]) + "\n"
     message += "\n"
     message += "Days:" + result[DAYS_INDEX] + "\n"
@@ -354,29 +369,25 @@ def format_results(results):
         message += "Dept and Number:" + listing[DEPT_INDEX] + listing[NUM_INDEX] + "\n"
     message += "\n"
 
+    # Print the area
     message += "Area:" + result[AREA_INDEX] + "\n"
     message += "\n"
 
-    # print a wrapped title
-    #  frmtd_row = wrap(wrapper, "Title: " + result[TITLE_INDEX])
-    #  print(frmtd_row)
+    # print the title
     message += "Title: " + result[TITLE_INDEX] + "\n"
     message += "\n"
 
-    # print a wrapped description
-    #  frmtd_row = wrap(wrapper, "Description: " + result[DESCRIPT_INDEX])
-    #  print(frmtd_row)
+    # print the description
     message += "Description: " + result[DESCRIPT_INDEX] + "\n"
     message += "\n"
 
-    # print a wrapped set of prerequisites
+    # print the set of prerequisites
     if result[PREREQ_INDEX] != "":
-        #   frmtd_row = wrap(wrapper, "Prerequisites: " + result[PREREQ_INDEX])
-        #   print(frmtd_row)
         message += "Prerequisites: " + result[PREREQ_INDEX] + "\n"
     else:
         message += "Prerequisites:" + "\n"
 
+    # print the professors, if they exist
     if len(result) > PROF_INDEX:
         message += "\n"
         more_profs = True
@@ -391,6 +402,7 @@ def format_results(results):
 
 
 def main():
+    # TODO: Actually handle this correctly using ArgParse
     if len(argv) != 3:
         print("Usage: python %s host port", argv[0])
         exit(1)
@@ -399,6 +411,7 @@ def main():
 
     window = QMainWindow()
 
+    # Set the layout
     layout = setLayout(window)
     frame = QFrame()
     frame.setLayout(layout)
