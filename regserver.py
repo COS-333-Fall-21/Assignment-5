@@ -1,14 +1,22 @@
 #regserver.py
 from sys import exit, argv, stderr
-from socket import socket
+from socket import socket, SOL_SOCKET, SO_REUSEADDR
 from pickle import load, dump
 from os import name
 import argparse
 from sqlite3 import connect, OperationalError, DatabaseError
 from contextlib import closing
 
+DATABASE_URL = "file:reg.sqlite?mode=ro"
+
+CLASS_ID_INDEX = 0
+DEPT_INDEX = 1
+COURSE_NUM_INDEX = 2
+AREA_INDEX = 3
+TITLE_INDEX = 4
+
 # query DB for all class rows that meet the parameters
-def get_classes(class_info):
+def get_classes(query_args):
     try:
         with connect(DATABASE_URL, uri=True) as connection:
             cursor = connection.cursor()
@@ -56,8 +64,8 @@ def get_classes(class_info):
         print("%s: " % argv[0], ex, file=stderr)
         exit(1)
 
-# query DB for all details of one class with id classid
-def get_details(classid):
+# query DB for all details of one class with id class_id
+def get_details(class_id):
     try:
         with connect(DATABASE_URL, uri=True) as connection:
             cursor = connection.cursor()
