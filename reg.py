@@ -65,8 +65,7 @@ def create_list_widget(rows):
 
 
 def update_list_widget(list_widget, rows):
-    while list_widget.item(0) != None:
-        list_widget.removeItemWidget(list_widget.row(0))
+    list_widget.clear()
 
     i = 0
     for row in rows:
@@ -144,7 +143,6 @@ def set_layout(window):
 
         list_fill_info = get_classes(class_info)
         update_list_widget(list_widget, list_fill_info)
-        list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
 
     def fetch_all_classes():
