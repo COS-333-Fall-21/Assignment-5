@@ -278,7 +278,7 @@ def main():
     window = QMainWindow()
 
     # Set the layout
-    layout = setLayout(window)
+    layout = set_layout(window)
     frame = QFrame()
     frame.setLayout(layout)
 

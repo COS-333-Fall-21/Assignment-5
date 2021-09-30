@@ -27,9 +27,12 @@ def get_classes(query_args):
 
                 # query set up- applies to all queries for this program
                 stmt_str = (
-                    "SELECT classes.classid, crosslistings.dept, "
+                    "SELECT classes.classid, "
+                    + "crosslistings.dept, "
+                    + "crosslistings.coursenum, "
+                    + "courses.area, "
+                    + "courses.title "
                 )
-                stmt_str += "crosslistings.coursenum, courses.area, courses.title "
                 stmt_str += "FROM crosslistings, courses, classes "
                 stmt_str += "WHERE courses.courseid = classes.courseid "
                 stmt_str += (
@@ -142,9 +145,9 @@ def handle_client(sock):
     in_flo.close()
 
     # Choose which DB query to use based on type of data from client
-    if type(client_data) == dict:
+    if isinstance(client_data) == dict:
         server_data = get_classes(client_data)
-    elif type(client_data) == str:
+    elif isinstance(client_data) == str:
         server_data = get_details(client_data)
 
     # Send the list of rows to the server
