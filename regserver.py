@@ -1,4 +1,4 @@
-#regserver.py
+# regserver.py
 from sys import exit, argv, stderr
 from socket import socket, SOL_SOCKET, SO_REUSEADDR
 from pickle import load, dump
@@ -26,15 +26,28 @@ def get_classes(query_args):
             with closing(connection.cursor()) as cursor:
 
                 # query set up- applies to all queries for this program
-                stmt_str = "SELECT classes.classid, crosslistings.dept, crosslistings.coursenum, courses.area, courses.title "
+                stmt_str = (
+                    "SELECT classes.classid, "
+                    + "crosslistings.dept, "
+                    + "crosslistings.coursenum, "
+                    + "courses.area, "
+                    + "courses.title "
+                )
                 stmt_str += "FROM crosslistings, courses, classes "
-                stmt_str += "WHERE courses.courseid = classes.courseid AND courses.courseid = crosslistings.courseid "
+                stmt_str += "WHERE courses.courseid = classes.courseid "
+                stmt_str += (
+                    "AND courses.courseid = crosslistings.courseid "
+                )
 
                 # set query arguments based on command-line arguments
                 if "dept" in query_args:
-                    stmt_str += "AND instr(LOWER(crosslistings.dept), ?)"
+                    stmt_str += (
+                        "AND instr(LOWER(crosslistings.dept), ?)"
+                    )
                 if "num" in query_args:
-                    stmt_str += "AND instr(LOWER(crosslistings.coursenum), ?)"
+                    stmt_str += (
+                        "AND instr(LOWER(crosslistings.coursenum), ?)"
+                    )
                 if "area" in query_args:
                     stmt_str += "AND instr(LOWER(courses.area), ?)"
                 if "title" in query_args:
@@ -44,7 +57,8 @@ def get_classes(query_args):
                 cursor.execute(stmt_str, list(query_args.values()))
 
                 rows = cursor.fetchall()
-                # because sorting is stable, we do the tertiary sort, then the secondary, then the primary
+                # because sorting is stable, we do the tertiary sort,
+                # then the secondary, then the primary
                 rows.sort(key=lambda row: row[CLASS_ID_INDEX])
                 rows.sort(key=lambda row: row[COURSE_NUM_INDEX])
                 rows.sort(key=lambda row: row[DEPT_INDEX])
@@ -66,6 +80,7 @@ def get_classes(query_args):
         print("%s: " % argv[0], ex, file=stderr)
         exit(1)
 
+
 # query DB for all details of one class with id class_id
 def get_details(class_id):
     try:
@@ -74,10 +89,15 @@ def get_details(class_id):
 
             with closing(connection.cursor()) as cursor:
                 stmt_str = "SELECT * "
-                stmt_str += "FROM classes, crosslistings, courses, coursesprofs, profs "
+                stmt_str += "FROM classes, crosslistings, "
+                stmt_str += "courses, coursesprofs, profs "
                 stmt_str += "WHERE courses.courseid = classes.courseid "
-                stmt_str += "AND courses.courseid = crosslistings.courseid "
-                stmt_str += "AND courses.courseid = coursesprofs.courseid "
+                stmt_str += (
+                    "AND courses.courseid = crosslistings.courseid "
+                )
+                stmt_str += (
+                    "AND courses.courseid = coursesprofs.courseid "
+                )
                 stmt_str += "AND coursesprofs.profid = profs.profid "
                 stmt_str += "AND classes.classid = ? "
 
@@ -107,7 +127,9 @@ def get_details(class_id):
 
     # Class with class id does not exist
     except ValueError as ex:
-        print("no class with class id %s exists" % class_id, file=stderr)
+        print(
+            "no class with class id %s exists" % class_id, file=stderr
+        )
         exit(2)
 
     # Catch all other exceptions
@@ -123,51 +145,51 @@ def handle_client(sock):
     in_flo.close()
 
     # Choose which DB query to use based on type of data from client
-    if type(client_data) == dict:
+    if isinstance(client_data, dict):
         server_data = get_classes(client_data)
-    elif type(client_data) == str:
+    elif isinstance(client_data, str):
         server_data = get_details(client_data)
 
     # Send the list of rows to the server
     out_flo = sock.makefile(mode="wb")
     dump(server_data, out_flo)
     out_flo.flush()
-    print('Wrote to client')
+    print("Wrote to client")
+
 
 def main():
     # TODO: Actually handle this correctly using ArgParse
     if len(argv) != 2:
         print("Usage: python %s port", argv[0])
         exit(1)
-    
+
     try:
         port = int(argv[1])
         server_sock = socket()
-        print('Opened server socket')
-        if (name != 'nt'):
+        print("Opened server socket")
+        if name != "nt":
             server_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        server_sock.bind(('', port))
-        print('Bound server socket to port')
+        server_sock.bind(("", port))
+        print("Bound server socket to port")
         server_sock.listen()
-        print('Listening')
+        print("Listening")
         while True:
-            try: 
+            try:
                 sock, client_addr = server_sock.accept()
                 with sock:
-                    print('Accepted connection for ' + str(client_addr))
-                    print('Opened socket for ' + str(client_addr))
+                    print("Accepted connection for " + str(client_addr))
+                    print("Opened socket for " + str(client_addr))
                     handle_client(sock)
             except Exception as ex:
-                #TODO: actualy handle exceptions
+                # TODO: actualy handle exceptions
                 print(ex, file=stderr)
                 exit(1)
 
     except Exception as ex:
-        #TODO: actualy handle exceptions
+        # TODO: actualy handle exceptions
         print(ex, file=stderr)
         exit(1)
 
-    
 
 if __name__ == "__main__":
     main()

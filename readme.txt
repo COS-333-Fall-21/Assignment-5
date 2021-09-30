@@ -11,3 +11,5 @@ https://javahungry.blogspot.com/2021/05/charat-python.html
 https://stackoverflow.com/questions/15561608/detecting-enter-on-a-qlineedit-or-qpushbutton  
 
 Assignment Assessment:
+
+Time Spent: 
