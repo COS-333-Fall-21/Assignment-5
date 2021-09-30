@@ -260,9 +260,9 @@ def get_details(class_id):
         exit(1)
 
 
+list_widget = None
 # 5 rows by 3 columns
 def setLayout(window):
-    list_widget = None
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
         global list_widget
