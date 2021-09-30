@@ -64,6 +64,17 @@ def create_list_widget(rows):
     return list_widget
 
 
+def update_list_widget(list_widget, rows):
+    while list_widget.item(0) != None:
+        list_widget.removeItemWidget(list_widget.row(0))
+
+    i = 0
+    for row in rows:
+        list_widget.insertItem(i, row_to_string(row))
+        i = i + 1
+    return list_widget
+
+
 # Sends a dict to the server with class info
 # returns a list of row tuples
 def get_classes(class_info):
@@ -120,12 +131,10 @@ def get_details(class_id):
         exit(1)
 
 
-list_widget = None
 # 5 rows by 3 columns
 def set_layout(window):
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
-        global list_widget
         class_info = {
             "dept": dept_edit.text(),
             "num": num_edit.text(),
@@ -134,9 +143,23 @@ def set_layout(window):
         }
 
         list_fill_info = get_classes(class_info)
+        update_list_widget(list_widget, list_fill_info)
+        list_widget.activated.connect(list_click_slot)
+        add_list_widget(layout, list_widget)
+
+    def fetch_all_classes():
+        class_info = {
+            "dept": "",
+            "num": "",
+            "area": "",
+            "title": "",
+        }
+
+        list_fill_info = get_classes(class_info)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
+        return list_widget
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
@@ -182,7 +205,7 @@ def set_layout(window):
     # Start by filling the widget with all the classes
     # (i.e. a query with all empty strings)
     #  list_fill_info = dummy_rows
-    submit_button_slot()
+    list_widget = fetch_all_classes()
 
     # create the list widget
     # list_widget = create_list_widget(list_fill_info)
