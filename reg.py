@@ -354,22 +354,24 @@ def format_results(results):
     message = ""
 
     # Add the first fields to the message
-    message += "Course Id:" + str(result[ID_INDEX]) + "\n"
+    message += "Course Id: " + str(result[ID_INDEX]) + "\n"
     message += "\n"
-    message += "Days:" + result[DAYS_INDEX] + "\n"
-    message += "Start time:" + result[START_INDEX] + "\n"
-    message += "End time:" + result[END_INDEX] + "\n"
-    message += "Building:" + result[BLD_INDEX] + "\n"
-    message += "Room:" + result[ROOM_INDEX] + "\n"
+    message += "Days: " + result[DAYS_INDEX] + "\n"
+    message += "Start time: " + result[START_INDEX] + "\n"
+    message += "End time: " + result[END_INDEX] + "\n"
+    message += "Building: " + result[BLD_INDEX] + "\n"
+    message += "Room: " + result[ROOM_INDEX] + "\n"
     message += "\n"
 
     # print every crosslisted dept/number
     for listing in results:
-        message += "Dept and Number:" + listing[DEPT_INDEX] + listing[NUM_INDEX] + "\n"
+        message += (
+            "Dept and Number: " + listing[DEPT_INDEX] + " " + listing[NUM_INDEX] + "\n"
+        )
     message += "\n"
 
     # Print the area
-    message += "Area:" + result[AREA_INDEX] + "\n"
+    message += "Area: " + result[AREA_INDEX] + "\n"
     message += "\n"
 
     # print the title
@@ -384,7 +386,7 @@ def format_results(results):
     if result[PREREQ_INDEX] != "":
         message += "Prerequisites: " + result[PREREQ_INDEX] + "\n"
     else:
-        message += "Prerequisites:" + "\n"
+        message += "Prerequisites: None" + "\n"
 
     # print the professors, if they exist
     if len(result) > PROF_INDEX:
@@ -392,7 +394,7 @@ def format_results(results):
         more_profs = True
         i = PROF_INDEX
         while more_profs:
-            message += "Professor:" + result[i] + "\n"
+            message += "Professor: " + result[i] + "\n"
             i += 1
             if len(result) <= i:
                 more_profs = False
