@@ -284,9 +284,9 @@ def setLayout(window):
         # Format a class Id to be a string with no leading or trailing whitespace
         class_id = list_widget.currentItem().text()
         if class_id[0] == " ":
-            class_id = str(class_id[1:4])
+            class_id = str(class_id[1:5])
         else:
-            class_id = str(class_id[:4])
+            class_id = str(class_id[:5])
 
         #   results = dummy_details
         results = get_details(class_id)
