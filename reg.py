@@ -262,6 +262,7 @@ def get_details(class_id):
 
 # 5 rows by 3 columns
 def setLayout(window):
+    list_widget = []
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
         class_info = {
@@ -319,7 +320,6 @@ def setLayout(window):
     # Start by filling the widget with all the classes
     # (i.e. a query with all empty strings)
     #  list_fill_info = dummy_rows
-    list_fill_info = []
     submit_button_slot()
 
     # create the list widget
