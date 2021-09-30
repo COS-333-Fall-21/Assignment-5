@@ -227,7 +227,6 @@ def get_classes(class_info):
             details = load(in_flo)
             in_flo.close()
 
-        print(details)
         return details
 
     except Exception as ex:
@@ -273,7 +272,9 @@ def setLayout(window):
         }
 
         list_fill_info = get_classes(class_info)
+        print(list_fill_info)
         list_widget = create_list_widget(list_fill_info)
+        list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
 
     # Function for when a list item is doulbe clicked (or equivalent)
@@ -322,8 +323,7 @@ def setLayout(window):
     submit_button_slot()
 
     # create the list widget
-    list_widget = create_list_widget(list_fill_info)
-    list_widget.activated.connect(list_click_slot)
+    # list_widget = create_list_widget(list_fill_info)
 
     # Create the submit button
     submit_button = QPushButton("Submit")
@@ -341,7 +341,7 @@ def setLayout(window):
 
     layout.addWidget(submit_button, 0, 2, 4, 1)
 
-    add_list_widget(layout, list_widget)
+    # add_list_widget(layout, list_widget)
 
     return layout
 

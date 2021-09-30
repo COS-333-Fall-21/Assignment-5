@@ -17,6 +17,8 @@ TITLE_INDEX = 4
 
 # query DB for all class rows that meet the parameters
 def get_classes(query_args):
+    for key in query_args.keys():
+        query_args[key] = query_args[key].lower()
     try:
         with connect(DATABASE_URL, uri=True) as connection:
             cursor = connection.cursor()
