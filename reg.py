@@ -37,7 +37,13 @@ dummy_rows = [
     (8291, "COS", "116", "ST", "The Computational Universe"),
     (8292, "COS", "126", "QR", "General Computer Science"),
     (8293, "COS", "126", "QR", "General Computer Science"),
-    (8308, "COS", "217", "QR", "Introduction to C_Science Programming Systems"),
+    (
+        8308,
+        "COS",
+        "217",
+        "QR",
+        "Introduction to C_Science Programming Systems",
+    ),
     (8313, "COS", "226", "QR", "Algorithms and Data Structures"),
     (
         9032,
@@ -76,19 +82,49 @@ dummy_rows = [
         "Computer and Electronic Music through Programming, Performance, and Composition",
     ),
     (8320, "COS", "320", "", "Compiling Techniques"),
-    (8321, "COS", "333", "", "Advanced C%Science Programming Techniques"),
+    (
+        8321,
+        "COS",
+        "333",
+        "",
+        "Advanced C%Science Programming Techniques",
+    ),
     (9240, "COS", "342", "QR", "Introduction to Graph Theory"),
-    (8322, "COS", "398", "", "Junior Independent Work (B.S.E. candidates only)"),
+    (
+        8322,
+        "COS",
+        "398",
+        "",
+        "Junior Independent Work (B.S.E. candidates only)",
+    ),
     (10009, "COS", "401", "", "Introduction to Machine Translation"),
     (8323, "COS", "423", "", "Theory of Algorithms"),
     (8324, "COS", "424", "", "Interacting with Data"),
     (8325, "COS", "426", "", "Computer Graphics"),
     (8326, "COS", "433", "", "Cryptography"),
-    (8327, "COS", "435", "", "Information Retrieval, Discovery, and Delivery"),
-    (8328, "COS", "444", "SA", "Internet Auctions: Theory and Practice"),
+    (
+        8327,
+        "COS",
+        "435",
+        "",
+        "Information Retrieval, Discovery, and Delivery",
+    ),
+    (
+        8328,
+        "COS",
+        "444",
+        "SA",
+        "Internet Auctions: Theory and Practice",
+    ),
     (8329, "COS", "451", "", "Computational Geometry"),
     (8330, "COS", "461", "", "Computer Networks"),
-    (8331, "COS", "498", "", "Senior Independent Work (B.S.E. candidates only)"),
+    (
+        8331,
+        "COS",
+        "498",
+        "",
+        "Senior Independent Work (B.S.E. candidates only)",
+    ),
     (8332, "COS", "522", "", "Computational Complexity"),
     (
         10244,
@@ -366,7 +402,11 @@ def format_results(results):
     # print every crosslisted dept/number
     for listing in results:
         message += (
-            "Dept and Number: " + listing[DEPT_INDEX] + " " + listing[NUM_INDEX] + "\n"
+            "Dept and Number: "
+            + listing[DEPT_INDEX]
+            + " "
+            + listing[NUM_INDEX]
+            + "\n"
         )
     message += "\n"
 
