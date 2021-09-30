@@ -224,10 +224,10 @@ def get_classes(class_info):
 
             # Read the list of rows from the server
             in_flo = sock.makefile(mode="rb")
-            details = load(in_flo)
+            classes = load(in_flo)
             in_flo.close()
 
-        return details
+        return classes
 
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
@@ -272,7 +272,6 @@ def setLayout(window):
         }
 
         list_fill_info = get_classes(class_info)
-        print(list_fill_info)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
@@ -282,6 +281,7 @@ def setLayout(window):
     # Function for when a list item is doulbe clicked (or equivalent)
     def list_click_slot():
         # Format a class Id to be a string with no leading or trailing whitespace
+        print(list_widget.currentItem().text())
         class_id = list_widget.currentItem().text()
         if class_id[0] == " ":
             class_id = str(class_id[1:5])
