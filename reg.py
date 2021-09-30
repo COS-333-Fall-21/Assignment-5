@@ -265,6 +265,7 @@ def setLayout(window):
     list_widget = None
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
+        global list_widget
         class_info = {
             "dept": dept_edit.text(),
             "num": num_edit.text(),
