@@ -216,6 +216,9 @@ def get_classes(class_info):
 
             # Send the class info dict to the server
             out_flo = sock.makefile(mode="wb")
+            print("Dumping...")
+            print(class_info)
+            print()
             dump(class_info, out_flo)
             out_flo.flush()
 
@@ -268,8 +271,8 @@ def setLayout(window):
             "area": area_edit.text(),
             "title": title_edit.text(),
         }
-        #   list_fill_info = get_classes(class_info)
-        list_fill_info = []
+
+        list_fill_info = get_classes(class_info)
         list_widget = create_list_widget(list_fill_info)
         add_list_widget(layout, list_widget)
 
@@ -293,11 +296,8 @@ def setLayout(window):
     def add_list_widget(layout, list_widget):
         layout.addWidget(list_widget, 4, 0, 1, 3)
 
-    # Start by filling the widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    list_fill_info = []
-    submit_button_slot()
+    # Create the layout
+    layout = QGridLayout()
 
     # Create the four input labels
     dept_label = QLabel("Dept:")
@@ -315,6 +315,12 @@ def setLayout(window):
     title_edit = QLineEdit()
     title_edit.returnPressed.connect(submit_button_slot)
 
+    # Start by filling the widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_fill_info = []
+    submit_button_slot()
+
     # create the list widget
     list_widget = create_list_widget(list_fill_info)
     list_widget.activated.connect(list_click_slot)
@@ -322,9 +328,6 @@ def setLayout(window):
     # Create the submit button
     submit_button = QPushButton("Submit")
     submit_button.clicked.connect(submit_button_slot)
-
-    # Create the layout
-    layout = QGridLayout()
 
     layout.addWidget(dept_label, 0, 0, 1, 1)
     layout.addWidget(num_label, 1, 0, 1, 1)
