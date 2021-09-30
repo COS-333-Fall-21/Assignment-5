@@ -1,5 +1,7 @@
 # reg.py
 from sys import exit, argv, stderr
+from socket import socket
+from pickle import load, dump
 from PyQt5.QtWidgets import (
     QApplication,
     QFrame,
@@ -12,10 +14,7 @@ from PyQt5.QtWidgets import (
     QListWidget,
     QMessageBox,
 )
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from socket import socket
-from pickle import load, dump
 
 # Constants for formatting class details
 ID_INDEX = 1
@@ -65,7 +64,8 @@ def create_list_widget(rows):
     return list_widget
 
 
-# Sends a dict to the server with class info; returns a list of row tuples
+# Sends a dict to the server with class info
+# returns a list of row tuples
 def get_classes(class_info):
     try:
         host = argv[1]
@@ -93,7 +93,8 @@ def get_classes(class_info):
         exit(1)
 
 
-# Sends the class Id to the serverl returns a list of tuples representing class details
+# Sends the class Id to the server
+# returns a list of tuples representing class details
 def get_details(class_id):
     try:
         host = argv[1]
@@ -121,7 +122,7 @@ def get_details(class_id):
 
 list_widget = None
 # 5 rows by 3 columns
-def setLayout(window):
+def set_layout(window):
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
         global list_widget
@@ -137,9 +138,10 @@ def setLayout(window):
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
 
-    # Function for when a list item is doulbe clicked (or equivalent)
+    # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
-        # Format a class Id to be a string with no leading or trailing whitespace
+        # Format a class dd to be a string
+        # with no leading or trailing whitespace
         print(list_widget.currentItem().text())
         class_id = list_widget.currentItem().text()
         if class_id[0] == " ":
