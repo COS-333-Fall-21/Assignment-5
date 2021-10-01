@@ -25,12 +25,11 @@ END_INDEX = 4
 BLD_INDEX = 5
 ROOM_INDEX = 6
 DEPT_INDEX = 7
-NUM_INDEX = 8
-AREA_INDEX = 9
-TITLE_INDEX = 10
-DESCRIPT_INDEX = 11
-PREREQ_INDEX = 12
-PROF_INDEX = 13
+AREA_INDEX = 8
+TITLE_INDEX = 9
+DESCRIPT_INDEX = 10
+PREREQ_INDEX = 11
+PROF_INDEX = 12
 
 # parse the given array for the host and port
 def parse_args(argv):
@@ -113,7 +112,7 @@ def get_classes(class_info, host, port, window):
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
             in_flo.close()
-            print('in_flo complete')
+            print("in_flo complete")
 
             in_flo = sock.makefile(mode="rb")
             if success:
@@ -192,7 +191,7 @@ def set_layout(window, host, port):
             "area": "",
             "title": "",
         }
-        
+
         list_fill_info = get_classes(class_info, host, port, window)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
@@ -275,7 +274,7 @@ def add_labels(layout):
 
 # Format the class details in the proper way
 def format_results(result):
-    #result = results[0]
+    # result = results[0]
 
     message = ""
 
@@ -291,13 +290,7 @@ def format_results(result):
 
     # print every crosslisted dept/number
     for i in range(len(result[DEPT_INDEX])):
-        message += (
-            "Dept and Number: "
-            + result[DEPT_INDEX][i]
-            + " "
-            + result[NUM_INDEX][i]
-            + "\n"
-        )
+        message += "Dept and Number: " + result[DEPT_INDEX][i] + "\n"
     message += "\n"
 
     # Print the area
