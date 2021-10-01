@@ -143,7 +143,7 @@ def get_detail(class_id, host, port, window):
 
             # Send the class Id to the server
             out_flo = sock.makefile(mode="wb")
-            dump(class_id, out_flo)
+            dump(1, out_flo)
             out_flo.flush()
 
             print("sent command: get_detail")
@@ -214,6 +214,7 @@ def set_layout(window, host, port):
         #   results = dummy_details
 
         results = get_detail(class_id, host, port, window)
+        
         message = format_results(results)
 
         #   Activate the dialogue box with the appropriate detail
