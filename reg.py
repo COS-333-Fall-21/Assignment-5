@@ -131,7 +131,7 @@ def get_classes(class_info, host, port, window):
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred. Please contact the system administrator."
-        QMessageBox(window, "Server Error", message)
+        QMessageBox.information(window, "Server Error", message)
 
 
 # Sends the class Id to the server
@@ -167,7 +167,7 @@ def get_details(class_id, host, port, window):
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred. Please contact the system administrator."
-        QMessageBox(window, "Server Error", message)
+        QMessageBox.information(window, "Server Error", message)
 
 
 # 5 rows by 3 columns
