@@ -5,8 +5,11 @@ Assignment: 2
 
 
 
-Resources:
+Resources: (NOTE: do we have to cite our own re-used code? do we have to include all the same links from Assignment 1?)
 https://www.delftstack.com/howto/python/stringbuilder-in-python/
-https://javahungry.blogspot.com/2021/05/charat-python.html  
+https://javahungry.blogspot.com/2021/05/charat-python.html
+https://stackoverflow.com/questions/15561608/detecting-enter-on-a-qlineedit-or-qpushbutton  
 
 Assignment Assessment:
+
+Time Spent: 
