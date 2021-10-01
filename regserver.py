@@ -273,16 +273,16 @@ def handle_client(sock):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)
 
-    # confirm that the server has data for the client
-    out_flo = sock.makefile(mode="wb")
-    dump(True, out_flo)
-    out_flo.flush()
+    if server_data is not None:
+        # confirm that the server has data for the client
+        out_flo = sock.makefile(mode="wb")
+        dump(True, out_flo)
+        out_flo.flush()
 
-    # Send the data to the client
-    out_flo = sock.makefile(mode="wb")
-    print()
-    dump(server_data, out_flo)
-    out_flo.flush()
+        # Send the data to the client
+        out_flo = sock.makefile(mode="wb")
+        dump(server_data, out_flo)
+        out_flo.flush()
 
     print("Closed socket")
 
