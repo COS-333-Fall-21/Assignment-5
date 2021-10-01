@@ -80,11 +80,12 @@ def get_classes(class_info):
             print()
             dump(class_info, out_flo)
             out_flo.flush()
-
+            print('out_flo complete, in_flo next')
             # Read the list of rows from the server
             in_flo = sock.makefile(mode="rb")
             classes = load(in_flo)
             in_flo.close()
+            print('in_flo complete')
 
         return classes
 
@@ -209,8 +210,8 @@ def set_layout(window):
 
 
 # Format the class details in the proper way
-def format_results(results):
-    result = results[0]
+def format_results(result):
+    #result = results[0]
 
     message = ""
 
