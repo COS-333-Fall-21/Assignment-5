@@ -34,7 +34,7 @@ def parse_args(argv):
 
 
 # query DB for all class rows that meet the parameters
-def get_classes(query_args):
+def get_overviews(query_args):
     for key in query_args.keys():
         query_args[key] = query_args[key].lower()
     try:
@@ -98,7 +98,7 @@ def get_classes(query_args):
 
 
 # query DB for all details of one class with id class_id
-def get_details(class_id, sock):
+def get_detail(class_id, sock):
     try:
         with connect(DATABASE_URL, uri=True) as connection:
             cursor = connection.cursor()
@@ -267,9 +267,11 @@ def handle_client(sock):
 
     # Choose which DB query to use based on type of data from client
     if isinstance(client_data, dict):
-        server_data = get_classes(client_data)
+        print("Recieved command: get_overviews")
+        server_data = get_overviews(client_data)
     elif isinstance(client_data, str):
-        server_data = get_details(client_data, sock)
+        print("Recieved command: get_detail")
+        server_data = get_detail(client_data, sock)
 
     # confirm that the server has data for the client
     out_flo = sock.makefile(mode="wb")
@@ -280,6 +282,8 @@ def handle_client(sock):
     out_flo = sock.makefile(mode="wb")
     dump(server_data, out_flo)
     out_flo.flush()
+
+    print("Closed socket")
 
 
 def main():
@@ -299,8 +303,7 @@ def main():
             try:
                 sock, client_addr = server_sock.accept()
                 with sock:
-                    print("Accepted connection for " + str(client_addr))
-                    print("Opened socket for " + str(client_addr))
+                    print("Accepted connection, opened socket")
                     handle_client(sock)
             except Exception as ex:
                 # TODO: actualy handle exceptions
