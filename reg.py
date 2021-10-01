@@ -186,7 +186,21 @@ def set_layout(window):
 
     layout = add_labels(layout)
 
-    layout = add_line_edits(layout, submit_button_slot)
+    # Create the four input fields & connect them to the submit function
+    dept_edit = QLineEdit()
+    dept_edit.returnPressed.connect(submit_button_slot)
+    num_edit = QLineEdit()
+    num_edit.returnPressed.connect(submit_button_slot)
+    area_edit = QLineEdit()
+    area_edit.returnPressed.connect(submit_button_slot)
+    title_edit = QLineEdit()
+    title_edit.returnPressed.connect(submit_button_slot)
+
+    # Add the line edits to the layout
+    layout.addWidget(dept_edit, 0, 1, 1, 1)
+    layout.addWidget(num_edit, 1, 1, 1, 1)
+    layout.addWidget(area_edit, 2, 1, 1, 1)
+    layout.addWidget(title_edit, 3, 1, 1, 1)
 
     # Create the submit button & add it to the layout
     submit_button = QPushButton("Submit")
@@ -214,27 +228,6 @@ def add_labels(layout):
     layout.addWidget(num_label, 1, 0, 1, 1)
     layout.addWidget(area_label, 2, 0, 1, 1)
     layout.addWidget(title_label, 3, 0, 1, 1)
-
-    return layout
-
-
-# Helper method to add the line edits to the layout
-def add_line_edits(layout, submit_button_slot):
-    # Create the four input fields & connect them to the submit function
-    dept_edit = QLineEdit()
-    dept_edit.returnPressed.connect(submit_button_slot)
-    num_edit = QLineEdit()
-    num_edit.returnPressed.connect(submit_button_slot)
-    area_edit = QLineEdit()
-    area_edit.returnPressed.connect(submit_button_slot)
-    title_edit = QLineEdit()
-    title_edit.returnPressed.connect(submit_button_slot)
-
-    # Add the line edits to the layout
-    layout.addWidget(dept_edit, 0, 1, 1, 1)
-    layout.addWidget(num_edit, 1, 1, 1, 1)
-    layout.addWidget(area_edit, 2, 1, 1, 1)
-    layout.addWidget(title_edit, 3, 1, 1, 1)
 
     return layout
 
