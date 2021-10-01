@@ -266,6 +266,7 @@ def handle_client(sock):
     in_flo.close()
 
     # Choose which DB query to use based on type of data from client
+    server_data = None
     if isinstance(client_data, dict):
         print("Recieved command: get_overviews")
         server_data = get_overviews(client_data)
@@ -273,7 +274,8 @@ def handle_client(sock):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)
 
-    if server_data is not None:
+    if server_data != None:
+        print("*")
         # confirm that the server has data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)

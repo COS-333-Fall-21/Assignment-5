@@ -151,6 +151,7 @@ def get_detail(class_id, host, port, window):
             # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
+            print(success)
             in_flo.close()
 
             in_flo = sock.makefile(mode="rb")
