@@ -174,7 +174,7 @@ def get_details(class_id):
                 # save all profids to use in the next query
                 QUERY_PROFID_INDEX = 1
                 profids = []
-                for row in rows():
+                for row in rows:
                     profids.append(
                         row[QUERY_PROFID_INDEX])
 
