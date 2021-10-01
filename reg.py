@@ -113,6 +113,7 @@ def get_classes(class_info, host, port):
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
             in_flo.close()
+            print('in_flo complete')
 
             in_flo = sock.makefile(mode="rb")
             if success:
@@ -273,8 +274,8 @@ def add_labels(layout):
 
 
 # Format the class details in the proper way
-def format_results(results):
-    result = results[0]
+def format_results(result):
+    #result = results[0]
 
     message = ""
 

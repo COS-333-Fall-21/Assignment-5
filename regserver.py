@@ -42,7 +42,6 @@ def get_classes(query_args):
             cursor = connection.cursor()
 
             with closing(connection.cursor()) as cursor:
-
                 # query set up- applies to all queries for this program
                 stmt_str = (
                     "SELECT classes.classid, "
@@ -70,9 +69,10 @@ def get_classes(query_args):
                     stmt_str += "AND instr(LOWER(courses.area), ?)"
                 if "title" in query_args:
                     stmt_str += "AND instr(LOWER(courses.title), ?)"
-
+                print('pre-executing query')
                 # execute the query
                 cursor.execute(stmt_str, list(query_args.values()))
+                print('post-executing query')
 
                 rows = cursor.fetchall()
                 # because sorting is stable, we do the tertiary sort,
@@ -80,7 +80,7 @@ def get_classes(query_args):
                 rows.sort(key=lambda row: row[CLASS_ID_INDEX])
                 rows.sort(key=lambda row: row[COURSE_NUM_INDEX])
                 rows.sort(key=lambda row: row[DEPT_INDEX])
-
+                
                 return rows
 
     # Database cannot be opened
@@ -107,7 +107,7 @@ def get_details(class_id):
 
             with closing(connection.cursor()) as cursor:
                 results = []
-
+                print('pre query')
                 #-------------------------------------------------#
                 # select row in classes table with classid class_id
                 stmt_str = "SELECT * "
@@ -130,7 +130,7 @@ def get_details(class_id):
 
                 COURSE_ID_INDEX = 1
                 courseid = results[COURSE_ID_INDEX]
-
+                print('post classes query')
                 #-----------------------------------------#
                 # select rows in crosslistings table where
                 # courseid = classes.courseid
@@ -158,7 +158,7 @@ def get_details(class_id):
                 # throw an error if there is no matching course
                 if len(rows) == 0:
                     raise ValueError
-
+                print('post crosslistings query')
                 #-----------------------------------------#
                 # select row from courses table where courseid = classes.courseid
                 stmt_str = "SELECT * "
@@ -177,11 +177,14 @@ def get_details(class_id):
                 # skip appending coursenum again, just append
                 # area, title, descrip, and prereqs
                 #results.append(rows[0][1:])
-                for i in range(len(results)-1):
+                print(rows)
+                for i in range(len(rows[0])-1):
                     results.append(rows[0][i+1])
 
+                print('post courses query')
                 #-----------------------------------------#
-                # select rows from coursesprofs table where courseid = classes.courseid
+                # select rows from coursesprofs table where 
+                # courseid = classes.courseid
                 stmt_str = "SELECT * "
                 stmt_str += "FROM coursesprofs "
                 stmt_str += "WHERE coursesprofs.courseid = ? "
@@ -198,8 +201,8 @@ def get_details(class_id):
                     profids.append(
                         row[QUERY_PROFID_INDEX])
 
-                # don't throw an error - there are allowed to be zero profs
-
+                # don't throw an error- there can vebe zero profs
+                print('post coursesprofs query')
                 #-----------------------------------------#
                 # select rows from profs table for all selected profids
                 stmt_str = "SELECT * "
@@ -209,18 +212,26 @@ def get_details(class_id):
                 results.append([])
                 QUERY_PROFNAME_INDEX = 1
                 RESULTS_PROFNAME_INDEX = 13
+                print('len(results) =', len(results))
+                print(results)
+                print('len(profids) =', len(profids)) 
 
                 for profid in profids:
                     # execute the query
                     cursor.execute(stmt_str, [profid])
 
                     prof_data = cursor.fetchall()
+                    print('len(prof_data) =', len(prof_data))
+                    print('len(prof_data[0]) =', len(prof_data[0]))
                     results[RESULTS_PROFNAME_INDEX].append(
                         prof_data[0][QUERY_PROFNAME_INDEX])
 
+                # append the empty string if there are no profs
+                if len(profids) == 0:
+                    results[RESULTS_PROFNAME_INDEX].append('')
+                print('after final query (profs)')
+
                 return results
-
-
                 # --------------------- old query ---------------------------#
                 stmt_str = "SELECT * "
                 stmt_str += "FROM classes, crosslistings, "
