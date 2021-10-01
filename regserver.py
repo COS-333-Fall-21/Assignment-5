@@ -30,6 +30,7 @@ def parse_args(argv):
     )
 
     namespace = parser.parse_args(argv[1:])
+    print(vars(namespace))
     return vars(namespace)
 
 
