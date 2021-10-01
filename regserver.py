@@ -149,8 +149,9 @@ def get_details(class_id, sock):
                 results.append([])
                 for row in rows:
                     results[RESULTS_DEPT_INDEX].append(
-                        row[QUERY_DEPT_INDEX]
-                        + row[QUERY_COURSENUM_INDEX]
+                        row[QUERY_DEPT_INDEX] + 
+                        " " + 
+                        row[QUERY_COURSENUM_INDEX]
                     )
 
                 results[RESULTS_DEPT_INDEX].sort()
