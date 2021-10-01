@@ -1,4 +1,5 @@
 # reg.py
+from argparse import ArgumentParser
 from sys import exit, argv, stderr
 from socket import socket
 from pickle import load, dump
@@ -30,6 +31,28 @@ TITLE_INDEX = 12
 DESCRIPT_INDEX = 13
 PREREQ_INDEX = 14
 PROF_INDEX = 18
+
+# parse the given array for the host and port
+def parse_args(argv):
+    parser = ArgumentParser(
+        description="Client for the registrar application",
+        allow_abbrev=False,
+    )
+    parser.add_argument(
+        "host",
+        nargs=1,
+        help="the host on which the server is running",
+    )
+    parser.add_argument(
+        "port",
+        nargs=1,
+        type=int,
+        help="the port at which the server is listening",
+    )
+
+    namespace = parser.parse_args(argv[1:])
+    return vars(namespace)
+
 
 # Convert a row tuple to a string to print to the list widget
 def row_to_string(row):
@@ -76,10 +99,8 @@ def update_list_widget(list_widget, rows):
 
 # Sends a dict to the server with class info
 # returns a list of row tuples
-def get_classes(class_info, window):
+def get_classes(class_info, host, port):
     try:
-        host = argv[1]
-        port = int(argv[2])
         with socket() as sock:
             sock.connect((host, port))
 
@@ -114,10 +135,8 @@ def get_classes(class_info, window):
 
 # Sends the class Id to the server
 # returns a list of tuples representing class details
-def get_details(class_id, window):
+def get_details(class_id, host, port):
     try:
-        host = argv[1]
-        port = int(argv[2])
         with socket() as sock:
             sock.connect((host, port))
 
@@ -151,7 +170,7 @@ def get_details(class_id, window):
 
 
 # 5 rows by 3 columns
-def set_layout(window):
+def set_layout(window, host, port):
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
         class_info = {
@@ -172,8 +191,8 @@ def set_layout(window):
             "area": "",
             "title": "",
         }
-
-        list_fill_info = get_classes(class_info, window)
+        
+        list_fill_info = get_classes(class_info, host, port)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
@@ -191,7 +210,8 @@ def set_layout(window):
             class_id = str(class_id[:5])
 
         #   results = dummy_details
-        results = get_details(class_id, window)
+
+        results = get_details(class_id, host, port)
         message = format_results(results)
 
         #   Activate the dialogue box with the appropriate detail
@@ -312,17 +332,14 @@ def format_results(results):
 
 
 def main():
-    # TODO: Actually handle this correctly using ArgParse
-    if len(argv) != 3:
-        print("Usage: python %s host port", argv[0])
-        exit(1)
+    host, port = parse_args(argv)
 
     app = QApplication(argv)
 
     window = QMainWindow()
 
     # Set the layout
-    layout = set_layout(window)
+    layout = set_layout(window, host, port)
     frame = QFrame()
     frame.setLayout(layout)
 
