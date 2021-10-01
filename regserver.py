@@ -30,7 +30,6 @@ def parse_args(argv):
     )
 
     namespace = parser.parse_args(argv[1:])
-    print(vars(namespace))
     return vars(namespace)
 
 
@@ -327,7 +326,8 @@ def handle_client(sock):
 
 
 def main():
-    port = parse_args(argv)
+    parsed_args = parse_args(argv)
+    port = parsed_args["port"]
 
     try:
         server_sock = socket()
