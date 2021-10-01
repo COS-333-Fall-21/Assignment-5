@@ -291,13 +291,13 @@ def send_error_to_client(ex, sock):
     out_flo = sock.makefile(mode="wb")
     dump(False, out_flo)
     out_flo.flush()
-    print("Wrote True to client")
+    print("Wrote False to client")
 
     # Send the data to the client
     out_flo = sock.makefile(mode="wb")
     dump(ex, out_flo)
     out_flo.flush()
-    print("Wrote data to client")
+    print("Wrote exception to client")
 
 
 def handle_client(sock):
