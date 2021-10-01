@@ -275,7 +275,6 @@ def handle_client(sock):
         server_data = get_detail(client_data, sock)
 
     if server_data != None:
-        print("*")
         # confirm that the server has data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)

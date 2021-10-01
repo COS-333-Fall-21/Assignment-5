@@ -151,7 +151,6 @@ def get_detail(class_id, host, port, window):
             # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
-            print(success)
             in_flo.close()
 
             in_flo = sock.makefile(mode="rb")
@@ -220,8 +219,8 @@ def set_layout(window, host, port):
         #   results = dummy_details
 
         results = get_detail(class_id, host, port, window)
-
-        message = format_results(results)
+        if results is not None:
+            message = format_results(results)
 
         #   Activate the dialogue box with the appropriate detail
         QMessageBox.information(window, "Class Details", message)
