@@ -64,6 +64,16 @@ def create_list_widget(rows):
     return list_widget
 
 
+def update_list_widget(list_widget, rows):
+    list_widget.clear()
+
+    i = 0
+    for row in rows:
+        list_widget.insertItem(i, row_to_string(row))
+        i = i + 1
+    return list_widget
+
+
 # Sends a dict to the server with class info
 # returns a list of row tuples
 def get_classes(class_info):
@@ -120,12 +130,10 @@ def get_details(class_id):
         exit(1)
 
 
-list_widget = None
 # 5 rows by 3 columns
 def set_layout(window):
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
-        global list_widget
         class_info = {
             "dept": dept_edit.text(),
             "num": num_edit.text(),
@@ -134,9 +142,22 @@ def set_layout(window):
         }
 
         list_fill_info = get_classes(class_info)
+        update_list_widget(list_widget, list_fill_info)
+        add_list_widget(layout, list_widget)
+
+    def fetch_all_classes():
+        class_info = {
+            "dept": "",
+            "num": "",
+            "area": "",
+            "title": "",
+        }
+
+        list_fill_info = get_classes(class_info)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
+        return list_widget
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
@@ -163,11 +184,7 @@ def set_layout(window):
     # Create the layout
     layout = QGridLayout()
 
-    # Create the four input labels
-    dept_label = QLabel("Dept:")
-    num_label = QLabel("Number:")
-    area_label = QLabel("Area:")
-    title_label = QLabel("Title:")
+    layout = add_labels(layout)
 
     # Create the four input fields & connect them to the submit function
     dept_edit = QLineEdit()
@@ -179,31 +196,38 @@ def set_layout(window):
     title_edit = QLineEdit()
     title_edit.returnPressed.connect(submit_button_slot)
 
-    # Start by filling the widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    submit_button_slot()
-
-    # create the list widget
-    # list_widget = create_list_widget(list_fill_info)
-
-    # Create the submit button
-    submit_button = QPushButton("Submit")
-    submit_button.clicked.connect(submit_button_slot)
-
-    layout.addWidget(dept_label, 0, 0, 1, 1)
-    layout.addWidget(num_label, 1, 0, 1, 1)
-    layout.addWidget(area_label, 2, 0, 1, 1)
-    layout.addWidget(title_label, 3, 0, 1, 1)
-
+    # Add the line edits to the layout
     layout.addWidget(dept_edit, 0, 1, 1, 1)
     layout.addWidget(num_edit, 1, 1, 1, 1)
     layout.addWidget(area_edit, 2, 1, 1, 1)
     layout.addWidget(title_edit, 3, 1, 1, 1)
 
+    # Create the submit button & add it to the layout
+    submit_button = QPushButton("Submit")
+    submit_button.clicked.connect(submit_button_slot)
     layout.addWidget(submit_button, 0, 2, 4, 1)
 
-    # add_list_widget(layout, list_widget)
+    # Start by filling the list widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_widget = fetch_all_classes()
+
+    return layout
+
+
+# Helper method th add the labels to the layout
+def add_labels(layout):
+    # Create the four input labels
+    dept_label = QLabel("Dept:")
+    num_label = QLabel("Number:")
+    area_label = QLabel("Area:")
+    title_label = QLabel("Title:")
+
+    # add the labels to the widget
+    layout.addWidget(dept_label, 0, 0, 1, 1)
+    layout.addWidget(num_label, 1, 0, 1, 1)
+    layout.addWidget(area_label, 2, 0, 1, 1)
+    layout.addWidget(title_label, 3, 0, 1, 1)
 
     return layout
 
