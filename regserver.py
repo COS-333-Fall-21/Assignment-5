@@ -308,7 +308,7 @@ def handle_client(sock):
 
     # Choose which DB query to use based on type of data from client
     if isinstance(client_data, dict):
-        server_data = get_classes(client_data, sock)
+        server_data = get_classes(client_data)
     elif isinstance(client_data, str):
         server_data = get_details(client_data, sock)
 
