@@ -106,6 +106,120 @@ def get_details(class_id):
             cursor = connection.cursor()
 
             with closing(connection.cursor()) as cursor:
+                results = []
+
+                #-------------------------------------------------#
+                # select row in classes table with classid class_id
+                stmt_str = "SELECT * "
+                stmt_str += "FROM classes "
+                stmt_str += "WHERE classes.classid = ? "
+
+                # execute the query
+                cursor.execute(stmt_str, [class_id])
+
+                rows = cursor.fetchall()
+
+                # append all elements from this query
+                for row in rows:
+                    for element in row:
+                        results.append(element)
+
+                # throw an error if there is no matching class
+                if len(results) == 0:
+                    raise ValueError
+
+                COURSE_ID_INDEX = 1
+                courseid = results[COURSE_ID_INDEX]
+
+                #-----------------------------------------#
+                # select rows in crosslistings table where
+                # courseid = classes.courseid
+                stmt_str = "SELECT * "
+                stmt_str += "FROM crosslistings "
+                stmt_str += "WHERE crosslistings.courseid = ? "
+
+                # execute the query
+                cursor.execute(stmt_str, [courseid])
+
+                rows = cursor.fetchall()
+
+                QUERY_DEPT_INDEX = 1
+                QUERY_COURSENUM_INDEX = 2
+                RESULTS_DEPT_INDEX = 7
+                RESULTS_COURSENUM_INDEX = 8
+                results.append([])
+                results.append([])
+                for row in rows:
+                    results[RESULTS_DEPT_INDEX].append(
+                        row[QUERY_DEPT_INDEX])
+                    results[RESULTS_COURSENUM_INDEX].append(
+                        row[QUERY_COURSENUM_INDEX])
+
+                # throw an error if there is no matching course
+                if len(rows) == 0:
+                    raise ValueError
+
+                #-----------------------------------------#
+                # select row from courses table where courseid = classes.courseid
+                stmt_str = "SELECT * "
+                stmt_str += "FROM courses "
+                stmt_str += "WHERE courses.courseid = ? "
+
+                # execute the query
+                cursor.execute(stmt_str, [courseid])
+
+                rows = cursor.fetchall()
+
+                # throw an error if there is no matching course
+                if len(rows) == 0:
+                    raise ValueError
+
+                # skip appending coursenum again, just append
+                # area, title, descrip, and prereqs
+                results.append(rows[0][1:])
+
+                #-----------------------------------------#
+                # select rows from coursesprofs table where courseid = classes.courseid
+                stmt_str = "SELECT * "
+                stmt_str += "FROM coursesprofs "
+                stmt_str += "WHERE coursesprofs.courseid = ? "
+
+                # execute the query
+                cursor.execute(stmt_str, [courseid])
+
+                rows = cursor.fetchall()
+
+                # save all profids to use in the next query
+                QUERY_PROFID_INDEX = 1
+                profids = []
+                for row in rows():
+                    profids.append(
+                        row[QUERY_PROFID_INDEX])
+
+                # don't throw an error - there are allowed to be zero profs
+
+                #-----------------------------------------#
+                # select rows from profs table for all selected profids
+                stmt_str = "SELECT * "
+                stmt_str += "FROM profs "
+                stmt_str += "WHERE profs.profid = ? "
+                
+                results.append([])
+                QUERY_PROFNAME_INDEX = 1
+                RESULTS_PROFNAME_INDEX = 13
+
+                for profid in profids:
+                    # execute the query
+                    cursor.execute(stmt_str, [profid])
+
+                    prof_data = cursor.fetchall()
+                    results[RESULTS_PROFNAME_INDEX].append(
+                        prof_data[QUERY_PROFNAME_INDEX])
+
+                return results
+
+
+                # --------------------- old query ---------------------------#
                 stmt_str = "SELECT * "
                 stmt_str += "FROM classes, crosslistings, "
                 stmt_str += "courses, coursesprofs, profs "
