@@ -262,6 +262,7 @@ def get_details(class_id):
 
     # Database cannot be opened
     except OperationalError as ex:
+        # tell the client there was an error
         print("%s: " % argv[0], ex, file=stderr)
         exit(1)
 
@@ -275,6 +276,7 @@ def get_details(class_id):
         print(
             "no class with class id %s exists" % class_id, file=stderr
         )
+        # can't exit, need to pass the valueerror to the front and display it to the user
         exit(2)
 
     # Catch all other exceptions
