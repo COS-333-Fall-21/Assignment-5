@@ -201,10 +201,11 @@ def set_layout(window, host, port):
         }
 
         list_fill_info = get_overviews(class_info, host, port, window)
-        list_widget = create_list_widget(list_fill_info)
-        list_widget.activated.connect(list_click_slot)
-        add_list_widget(layout, list_widget)
-        return list_widget
+        if list_fill_info is not None:
+            list_widget = create_list_widget(list_fill_info)
+            list_widget.activated.connect(list_click_slot)
+            add_list_widget(layout, list_widget)
+            return list_widget
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
