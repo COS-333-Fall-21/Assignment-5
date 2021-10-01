@@ -98,7 +98,7 @@ def update_list_widget(list_widget, rows):
 
 # Sends a dict to the server with class info
 # returns a list of row tuples
-def get_classes(class_info, host, port, window):
+def get_overviews(class_info, host, port, window):
     try:
         with socket() as sock:
             sock.connect((host, port))
@@ -107,6 +107,8 @@ def get_classes(class_info, host, port, window):
             out_flo = sock.makefile(mode="wb")
             dump(class_info, out_flo)
             out_flo.flush()
+
+            print("sent command: get_overviews")
 
             # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
@@ -134,7 +136,7 @@ def get_classes(class_info, host, port, window):
 
 # Sends the class Id to the server
 # returns a list of tuples representing class details
-def get_details(class_id, host, port, window):
+def get_detail(class_id, host, port, window):
     try:
         with socket() as sock:
             sock.connect((host, port))
@@ -143,6 +145,8 @@ def get_details(class_id, host, port, window):
             out_flo = sock.makefile(mode="wb")
             dump(class_id, out_flo)
             out_flo.flush()
+
+            print("sent command: get_detail")
 
             # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
@@ -179,7 +183,7 @@ def set_layout(window, host, port):
             "title": title_edit.text(),
         }
 
-        list_fill_info = get_classes(class_info, host, port, window)
+        list_fill_info = get_overviews(class_info, host, port, window)
         update_list_widget(list_widget, list_fill_info)
         add_list_widget(layout, list_widget)
 
@@ -191,7 +195,7 @@ def set_layout(window, host, port):
             "title": "",
         }
 
-        list_fill_info = get_classes(class_info, host, port, window)
+        list_fill_info = get_overviews(class_info, host, port, window)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
         add_list_widget(layout, list_widget)
@@ -209,7 +213,7 @@ def set_layout(window, host, port):
 
         #   results = dummy_details
 
-        results = get_details(class_id, host, port, window)
+        results = get_detail(class_id, host, port, window)
         message = format_results(results)
 
         #   Activate the dialogue box with the appropriate detail
