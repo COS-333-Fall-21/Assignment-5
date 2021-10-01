@@ -255,15 +255,10 @@ def format_results(result):
         message += "Prerequisites: None" + "\n"
 
     # print the professors, if they exist
-    if len(result) > PROF_INDEX:
-        message += "\n"
-        more_profs = True
-        i = PROF_INDEX
-        while more_profs:
-            message += "Professor: " + result[i] + "\n"
-            i += 1
-            if len(result) <= i:
-                more_profs = False
+    message += "\n" + "Professor: "
+    if len(result[PROF_INDEX]) > 0:
+        for i in range(len(result[PROF_INDEX])):
+            message += result[PROF_INDEX][i] + "\n"
 
     return message
 
