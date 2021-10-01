@@ -186,12 +186,42 @@ def set_layout(window):
     # Create the layout
     layout = QGridLayout()
 
+    layout = add_labels(layout)
+
+    layout = add_line_edits(layout, submit_button_slot)
+
+    # Create the submit button & add it to the layout
+    submit_button = QPushButton("Submit")
+    submit_button.clicked.connect(submit_button_slot)
+    layout.addWidget(submit_button, 0, 2, 4, 1)
+
+    # Start by filling the list widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_widget = fetch_all_classes()
+
+    return layout
+
+
+# Helper method th add the labels to the layout
+def add_labels(layout):
     # Create the four input labels
     dept_label = QLabel("Dept:")
     num_label = QLabel("Number:")
     area_label = QLabel("Area:")
     title_label = QLabel("Title:")
 
+    # add the labels to the widget
+    layout.addWidget(dept_label, 0, 0, 1, 1)
+    layout.addWidget(num_label, 1, 0, 1, 1)
+    layout.addWidget(area_label, 2, 0, 1, 1)
+    layout.addWidget(title_label, 3, 0, 1, 1)
+
+    return layout
+
+
+# Helper method to add the line edits to the layout
+def add_line_edits(layout, submit_button_slot):
     # Create the four input fields & connect them to the submit function
     dept_edit = QLineEdit()
     dept_edit.returnPressed.connect(submit_button_slot)
@@ -202,31 +232,11 @@ def set_layout(window):
     title_edit = QLineEdit()
     title_edit.returnPressed.connect(submit_button_slot)
 
-    # Start by filling the widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    list_widget = fetch_all_classes()
-
-    # create the list widget
-    # list_widget = create_list_widget(list_fill_info)
-
-    # Create the submit button
-    submit_button = QPushButton("Submit")
-    submit_button.clicked.connect(submit_button_slot)
-
-    layout.addWidget(dept_label, 0, 0, 1, 1)
-    layout.addWidget(num_label, 1, 0, 1, 1)
-    layout.addWidget(area_label, 2, 0, 1, 1)
-    layout.addWidget(title_label, 3, 0, 1, 1)
-
+    # Add the line edits to the layout
     layout.addWidget(dept_edit, 0, 1, 1, 1)
     layout.addWidget(num_edit, 1, 1, 1, 1)
     layout.addWidget(area_edit, 2, 1, 1, 1)
     layout.addWidget(title_edit, 3, 1, 1, 1)
-
-    layout.addWidget(submit_button, 0, 2, 4, 1)
-
-    # add_list_widget(layout, list_widget)
 
     return layout
 
