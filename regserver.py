@@ -149,9 +149,9 @@ def get_details(class_id, sock):
                 results.append([])
                 for row in rows:
                     results[RESULTS_DEPT_INDEX].append(
-                        row[QUERY_DEPT_INDEX] + 
-                        " " + 
-                        row[QUERY_COURSENUM_INDEX]
+                        row[QUERY_DEPT_INDEX]
+                        + " "
+                        + row[QUERY_COURSENUM_INDEX]
                     )
 
                 results[RESULTS_DEPT_INDEX].sort()
@@ -226,6 +226,8 @@ def get_details(class_id, sock):
                     results[RESULTS_PROFNAME_INDEX].append(
                         prof_data[0][QUERY_PROFNAME_INDEX]
                     )
+
+                results[RESULTS_PROFNAME_INDEX].sort()
 
                 # append the empty string if there are no profs
                 if len(profids) == 0:
