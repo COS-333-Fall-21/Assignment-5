@@ -126,7 +126,7 @@ def get_overviews(class_info, host, port, window):
         return classes
 
     except ConnectionRefusedError as ex:
-        message = "%s: " % argv[0] + ex
+        message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Connection Refused", message)
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
@@ -165,7 +165,7 @@ def get_detail(class_id, host, port, window):
 
     except ConnectionRefusedError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "%s: " % argv[0] + ex
+        message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Connection Refused", message)
     except ValueError as ex:
         print("%s: " % argv[0], ex, file=stderr)
