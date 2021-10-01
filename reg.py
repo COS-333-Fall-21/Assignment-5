@@ -314,7 +314,7 @@ def format_results(result):
         for i in range(len(result[PROF_INDEX])):
             message += "Professor: " + result[PROF_INDEX][i] + "\n"
     else:
-        message += "Professor: "
+        message += ""
 
     return message
 
