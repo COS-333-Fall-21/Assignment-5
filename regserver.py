@@ -255,6 +255,7 @@ def send_error_to_client(ex, sock):
 
     # Send the data to the client
     out_flo = sock.makefile(mode="wb")
+    print()
     dump(ex, out_flo)
     out_flo.flush()
 
@@ -282,6 +283,7 @@ def handle_client(sock):
 
         # Send the data to the client
         out_flo = sock.makefile(mode="wb")
+        print()
         dump(server_data, out_flo)
         out_flo.flush()
 

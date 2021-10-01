@@ -143,7 +143,7 @@ def get_detail(class_id, host, port, window):
 
             # Send the class Id to the server
             out_flo = sock.makefile(mode="wb")
-            dump(str(1), out_flo)
+            dump(class_id, out_flo)
             out_flo.flush()
 
             print("sent command: get_detail")
@@ -222,8 +222,8 @@ def set_layout(window, host, port):
         if results is not None:
             message = format_results(results)
 
-        #   Activate the dialogue box with the appropriate detail
-        QMessageBox.information(window, "Class Details", message)
+            #   Activate the dialogue box with the appropriate detail
+            QMessageBox.information(window, "Class Details", message)
 
     # Add a list widget to the layout
     def add_list_widget(layout, list_widget):
