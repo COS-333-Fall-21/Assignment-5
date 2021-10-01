@@ -226,12 +226,12 @@ def format_results(result):
     message += "\n"
 
     # print every crosslisted dept/number
-    for listing in results:
+    for i in range(len(result[DEPT_INDEX])):
         message += (
             "Dept and Number: "
-            + listing[DEPT_INDEX]
+            + result[DEPT_INDEX][i]
             + " "
-            + listing[NUM_INDEX]
+            + result[NUM_INDEX][i]
             + "\n"
         )
     message += "\n"
