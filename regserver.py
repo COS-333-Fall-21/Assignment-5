@@ -69,10 +69,10 @@ def get_classes(query_args):
                     stmt_str += "AND instr(LOWER(courses.area), ?)"
                 if "title" in query_args:
                     stmt_str += "AND instr(LOWER(courses.title), ?)"
-                print('pre-executing query')
+                print("pre-executing query")
                 # execute the query
                 cursor.execute(stmt_str, list(query_args.values()))
-                print('post-executing query')
+                print("post-executing query")
 
                 rows = cursor.fetchall()
                 # because sorting is stable, we do the tertiary sort,
@@ -80,7 +80,7 @@ def get_classes(query_args):
                 rows.sort(key=lambda row: row[CLASS_ID_INDEX])
                 rows.sort(key=lambda row: row[COURSE_NUM_INDEX])
                 rows.sort(key=lambda row: row[DEPT_INDEX])
-                
+
                 return rows
 
     # Database cannot be opened
@@ -107,8 +107,8 @@ def get_details(class_id, sock):
 
             with closing(connection.cursor()) as cursor:
                 results = []
-                print('pre query')
-                #-------------------------------------------------#
+                print("pre query")
+                # -------------------------------------------------#
                 # select row in classes table with classid class_id
                 stmt_str = "SELECT * "
                 stmt_str += "FROM classes "
@@ -130,8 +130,8 @@ def get_details(class_id, sock):
 
                 COURSE_ID_INDEX = 1
                 courseid = results[COURSE_ID_INDEX]
-                print('post classes query')
-                #-----------------------------------------#
+                print("post classes query")
+                # -----------------------------------------#
                 # select rows in crosslistings table where
                 # courseid = classes.courseid
                 stmt_str = "SELECT * "
@@ -151,15 +151,33 @@ def get_details(class_id, sock):
                 results.append([])
                 for row in rows:
                     results[RESULTS_DEPT_INDEX].append(
-                        row[QUERY_DEPT_INDEX])
+                        row[QUERY_DEPT_INDEX]
+                    )
                     results[RESULTS_COURSENUM_INDEX].append(
-                        row[QUERY_COURSENUM_INDEX])
+                        row[QUERY_COURSENUM_INDEX]
+                    )
+
+                # sort the depts and coursenums based on the departments
+                unsorted_depts = results[RESULTS_DEPT_INDEX]
+                unsorted_nums = results[RESULTS_COURSENUM_INDEX]
+                sorted_depts_indices = sorted(
+                    range(len(unsorted_depts)),
+                    key=unsorted_depts.__getitem__,
+                )
+
+                for i in range(len(sorted_depts_indices)):
+                    results[RESULTS_DEPT_INDEX][i] = unsorted_depts[
+                        sorted_depts_indices[i]
+                    ]
+                    results[RESULTS_COURSENUM_INDEX][i] = unsorted_nums[
+                        sorted_depts_indices[i]
+                    ]
 
                 # throw an error if there is no matching course
                 if len(rows) == 0:
                     raise ValueError
-                print('post crosslistings query')
-                #-----------------------------------------#
+                print("post crosslistings query")
+                # -----------------------------------------#
                 # select row from courses table where courseid = classes.courseid
                 stmt_str = "SELECT * "
                 stmt_str += "FROM courses "
@@ -176,14 +194,14 @@ def get_details(class_id, sock):
 
                 # skip appending coursenum again, just append
                 # area, title, descrip, and prereqs
-                #results.append(rows[0][1:])
+                # results.append(rows[0][1:])
                 print(rows)
-                for i in range(len(rows[0])-1):
-                    results.append(rows[0][i+1])
+                for i in range(len(rows[0]) - 1):
+                    results.append(rows[0][i + 1])
 
-                print('post courses query')
-                #-----------------------------------------#
-                # select rows from coursesprofs table where 
+                print("post courses query")
+                # -----------------------------------------#
+                # select rows from coursesprofs table where
                 # courseid = classes.courseid
                 stmt_str = "SELECT * "
                 stmt_str += "FROM coursesprofs "
@@ -198,38 +216,38 @@ def get_details(class_id, sock):
                 QUERY_PROFID_INDEX = 1
                 profids = []
                 for row in rows:
-                    profids.append(
-                        row[QUERY_PROFID_INDEX])
+                    profids.append(row[QUERY_PROFID_INDEX])
 
                 # don't throw an error- there can vebe zero profs
-                print('post coursesprofs query')
-                #-----------------------------------------#
+                print("post coursesprofs query")
+                # -----------------------------------------#
                 # select rows from profs table for all selected profids
                 stmt_str = "SELECT * "
                 stmt_str += "FROM profs "
                 stmt_str += "WHERE profs.profid = ? "
-                
+
                 results.append([])
                 QUERY_PROFNAME_INDEX = 1
                 RESULTS_PROFNAME_INDEX = 13
-                print('len(results) =', len(results))
+                print("len(results) =", len(results))
                 print(results)
-                print('len(profids) =', len(profids)) 
+                print("len(profids) =", len(profids))
 
                 for profid in profids:
                     # execute the query
                     cursor.execute(stmt_str, [profid])
 
                     prof_data = cursor.fetchall()
-                    print('len(prof_data) =', len(prof_data))
-                    print('len(prof_data[0]) =', len(prof_data[0]))
+                    print("len(prof_data) =", len(prof_data))
+                    print("len(prof_data[0]) =", len(prof_data[0]))
                     results[RESULTS_PROFNAME_INDEX].append(
-                        prof_data[0][QUERY_PROFNAME_INDEX])
+                        prof_data[0][QUERY_PROFNAME_INDEX]
+                    )
 
                 # append the empty string if there are no profs
                 if len(profids) == 0:
-                    results[RESULTS_PROFNAME_INDEX].append('')
-                print('after final query (profs)')
+                    results[RESULTS_PROFNAME_INDEX].append("")
+                print("after final query (profs)")
 
                 return results
                 # --------------------- old query ---------------------------#
