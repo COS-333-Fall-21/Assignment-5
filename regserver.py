@@ -146,32 +146,14 @@ def get_details(class_id, sock):
                 QUERY_DEPT_INDEX = 1
                 QUERY_COURSENUM_INDEX = 2
                 RESULTS_DEPT_INDEX = 7
-                RESULTS_COURSENUM_INDEX = 8
-                results.append([])
                 results.append([])
                 for row in rows:
                     results[RESULTS_DEPT_INDEX].append(
                         row[QUERY_DEPT_INDEX]
-                    )
-                    results[RESULTS_COURSENUM_INDEX].append(
-                        row[QUERY_COURSENUM_INDEX]
+                        + row[QUERY_COURSENUM_INDEX]
                     )
 
-                # sort the depts and coursenums based on the departments
-                unsorted_depts = results[RESULTS_DEPT_INDEX]
-                unsorted_nums = results[RESULTS_COURSENUM_INDEX]
-                sorted_depts_indices = sorted(
-                    range(len(unsorted_depts)),
-                    key=unsorted_depts.__getitem__,
-                )
-
-                for i in range(len(sorted_depts_indices)):
-                    results[RESULTS_DEPT_INDEX][i] = unsorted_depts[
-                        sorted_depts_indices[i]
-                    ]
-                    results[RESULTS_COURSENUM_INDEX][i] = unsorted_nums[
-                        sorted_depts_indices[i]
-                    ]
+                results[RESULTS_DEPT_INDEX].sort()
 
                 # throw an error if there is no matching course
                 if len(rows) == 0:
@@ -228,7 +210,7 @@ def get_details(class_id, sock):
 
                 results.append([])
                 QUERY_PROFNAME_INDEX = 1
-                RESULTS_PROFNAME_INDEX = 13
+                RESULTS_PROFNAME_INDEX = 12
                 print("len(results) =", len(results))
                 print(results)
                 print("len(profids) =", len(profids))
