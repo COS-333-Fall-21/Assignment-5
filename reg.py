@@ -306,10 +306,7 @@ def format_results(result):
     message += "\n"
 
     # print the set of prerequisites
-    if result[PREREQ_INDEX] != "":
-        message += "Prerequisites: " + result[PREREQ_INDEX] + "\n"
-    else:
-        message += "Prerequisites: None" + "\n"
+    message += "Prerequisites: " + result[PREREQ_INDEX] + "\n"
 
     # print the professors, if they exist
     message += "\n"
