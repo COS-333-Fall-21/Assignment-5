@@ -327,7 +327,7 @@ def handle_client(sock):
 
 def main():
     parsed_args = parse_args(argv)
-    port = parsed_args["port"]
+    port = parsed_args["port"][0]
 
     try:
         server_sock = socket()
