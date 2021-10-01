@@ -106,22 +106,31 @@ def get_classes(class_info, host, port):
 
             # Send the class info dict to the server
             out_flo = sock.makefile(mode="wb")
-            print("Dumping...")
-            print(class_info)
-            print()
             dump(class_info, out_flo)
             out_flo.flush()
 
-            # Read the list of rows from the server
+            # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
-            classes = load(in_flo)
+            success = load(in_flo)
             in_flo.close()
+
+            in_flo = sock.makefile(mode="rb")
+            if success:
+                # Read the list of rows from the server
+                classes = load(in_flo)
+                in_flo.close()
+            else:
+                raise load(in_flo)
 
         return classes
 
+    except ConnectionRefusedError as ex:
+        message = "%s: " % argv[0] + ex
+        QMessageBox.information(window, "Connection Refused", message)
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        message = "A server error occurred. Please contact the system administrator."
+        QMessageBox(window, "Server Error", message)
 
 
 # Sends the class Id to the server
@@ -136,17 +145,28 @@ def get_details(class_id, host, port):
             dump(class_id, out_flo)
             out_flo.flush()
 
-            # Read the list of tuples from the server
+            # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
-            details = load(in_flo)
+            success = load(in_flo)
             in_flo.close()
 
-        print(details)
+            in_flo = sock.makefile(mode="rb")
+            if success:
+                # Read the list of tuples from the server
+                details = load(in_flo)
+                in_flo.close()
+            else:
+                raise load(in_flo)
+
         return details
 
+    except ConnectionRefusedError as ex:
+        message = "%s: " % argv[0] + ex
+        QMessageBox.information(window, "Connection Refused", message)
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        message = "A server error occurred. Please contact the system administrator."
+        QMessageBox(window, "Server Error", message)
 
 
 # 5 rows by 3 columns
@@ -171,7 +191,7 @@ def set_layout(window, host, port):
             "area": "",
             "title": "",
         }
-
+        
         list_fill_info = get_classes(class_info, host, port)
         list_widget = create_list_widget(list_fill_info)
         list_widget.activated.connect(list_click_slot)
@@ -190,6 +210,7 @@ def set_layout(window, host, port):
             class_id = str(class_id[:5])
 
         #   results = dummy_details
+
         results = get_details(class_id, host, port)
         message = format_results(results)
 
