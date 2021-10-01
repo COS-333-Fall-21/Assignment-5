@@ -1,4 +1,5 @@
 # regserver.py
+from argparse import ArgumentParser
 from sys import exit, argv, stderr
 from socket import socket, SOL_SOCKET, SO_REUSEADDR
 from pickle import load, dump
@@ -14,6 +15,23 @@ DEPT_INDEX = 1
 COURSE_NUM_INDEX = 2
 AREA_INDEX = 3
 TITLE_INDEX = 4
+
+# parse the given array for the host and port
+def parse_args(argv):
+    parser = ArgumentParser(
+        description="Server for the registrar application",
+        allow_abbrev=False,
+    )
+    parser.add_argument(
+        "port",
+        nargs=1,
+        type=int,
+        help="the port at which the server should listen",
+    )
+
+    namespace = parser.parse_args(argv[1:])
+    return vars(namespace)
+
 
 # query DB for all class rows that meet the parameters
 def get_classes(query_args):
@@ -158,13 +176,9 @@ def handle_client(sock):
 
 
 def main():
-    # TODO: Actually handle this correctly using ArgParse
-    if len(argv) != 2:
-        print("Usage: python %s port", argv[0])
-        exit(1)
+    port = parse_args(argv)
 
     try:
-        port = int(argv[1])
         server_sock = socket()
         print("Opened server socket")
         if name != "nt":
