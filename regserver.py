@@ -69,10 +69,8 @@ def get_classes(query_args):
                     stmt_str += "AND instr(LOWER(courses.area), ?)"
                 if "title" in query_args:
                     stmt_str += "AND instr(LOWER(courses.title), ?)"
-                print("pre-executing query")
                 # execute the query
                 cursor.execute(stmt_str, list(query_args.values()))
-                print("post-executing query")
 
                 rows = cursor.fetchall()
                 # because sorting is stable, we do the tertiary sort,
@@ -107,7 +105,6 @@ def get_details(class_id, sock):
 
             with closing(connection.cursor()) as cursor:
                 results = []
-                print("pre query")
                 # -------------------------------------------------#
                 # select row in classes table with classid class_id
                 stmt_str = "SELECT * "
@@ -130,7 +127,6 @@ def get_details(class_id, sock):
 
                 COURSE_ID_INDEX = 1
                 courseid = results[COURSE_ID_INDEX]
-                print("post classes query")
                 # -----------------------------------------#
                 # select rows in crosslistings table where
                 # courseid = classes.courseid
@@ -159,7 +155,6 @@ def get_details(class_id, sock):
                 # throw an error if there is no matching course
                 if len(rows) == 0:
                     raise ValueError
-                print("post crosslistings query")
                 # -----------------------------------------#
                 # select row from courses table where courseid = classes.courseid
                 stmt_str = "SELECT * "
@@ -178,11 +173,9 @@ def get_details(class_id, sock):
                 # skip appending coursenum again, just append
                 # area, title, descrip, and prereqs
                 # results.append(rows[0][1:])
-                print(rows)
                 for i in range(len(rows[0]) - 1):
                     results.append(rows[0][i + 1])
 
-                print("post courses query")
                 # -----------------------------------------#
                 # select rows from coursesprofs table where
                 # courseid = classes.courseid
@@ -201,8 +194,7 @@ def get_details(class_id, sock):
                 for row in rows:
                     profids.append(row[QUERY_PROFID_INDEX])
 
-                # don't throw an error- there can vebe zero profs
-                print("post coursesprofs query")
+                # don't throw an error- there can be zero profs
                 # -----------------------------------------#
                 # select rows from profs table for all selected profids
                 stmt_str = "SELECT * "
@@ -212,17 +204,12 @@ def get_details(class_id, sock):
                 results.append([])
                 QUERY_PROFNAME_INDEX = 1
                 RESULTS_PROFNAME_INDEX = 12
-                print("len(results) =", len(results))
-                print(results)
-                print("len(profids) =", len(profids))
 
                 for profid in profids:
                     # execute the query
                     cursor.execute(stmt_str, [profid])
 
                     prof_data = cursor.fetchall()
-                    print("len(prof_data) =", len(prof_data))
-                    print("len(prof_data[0]) =", len(prof_data[0]))
                     results[RESULTS_PROFNAME_INDEX].append(
                         prof_data[0][QUERY_PROFNAME_INDEX]
                     )
@@ -232,34 +219,6 @@ def get_details(class_id, sock):
                 # append the empty string if there are no profs
                 if len(profids) == 0:
                     results[RESULTS_PROFNAME_INDEX].append("")
-                print("after final query (profs)")
-
-                return results
-                # --------------------- old query ---------------------------#
-                stmt_str = "SELECT * "
-                stmt_str += "FROM classes, crosslistings, "
-                stmt_str += "courses, coursesprofs, profs "
-                stmt_str += "WHERE courses.courseid = classes.courseid "
-                stmt_str += (
-                    "AND courses.courseid = crosslistings.courseid "
-                )
-                stmt_str += (
-                    "AND courses.courseid = coursesprofs.courseid "
-                )
-                stmt_str += "AND coursesprofs.profid = profs.profid "
-                stmt_str += "AND classes.classid = ? "
-
-                # execute the query
-                cursor.execute(stmt_str, [class_id])
-
-                results = cursor.fetchall()
-
-                # throw an error if there is no matching class
-                if len(results) == 0:
-                    raise ValueError
-
-                # sort based on department
-                results.sort(key=lambda row: row[DEPT_INDEX])
 
                 return results
 
@@ -279,7 +238,6 @@ def get_details(class_id, sock):
         print(
             "no class with class id %s exists" % class_id, file=stderr
         )
-        # can't exit, need to pass the valueerror to the front and display it to the user
         send_error_to_client(ex, sock)
 
     # Catch all other exceptions
@@ -294,13 +252,11 @@ def send_error_to_client(ex, sock):
     out_flo = sock.makefile(mode="wb")
     dump(False, out_flo)
     out_flo.flush()
-    print("Wrote False to client")
 
     # Send the data to the client
     out_flo = sock.makefile(mode="wb")
     dump(ex, out_flo)
     out_flo.flush()
-    print("Wrote exception to client")
 
 
 def handle_client(sock):
@@ -319,13 +275,11 @@ def handle_client(sock):
     out_flo = sock.makefile(mode="wb")
     dump(True, out_flo)
     out_flo.flush()
-    print("Wrote True to client")
 
     # Send the data to the client
     out_flo = sock.makefile(mode="wb")
     dump(server_data, out_flo)
     out_flo.flush()
-    print("Wrote data to client")
 
 
 def main():

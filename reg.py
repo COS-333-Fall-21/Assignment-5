@@ -112,7 +112,6 @@ def get_classes(class_info, host, port, window):
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
             in_flo.close()
-            print("in_flo complete")
 
             in_flo = sock.makefile(mode="rb")
             if success:
@@ -202,7 +201,6 @@ def set_layout(window, host, port):
     def list_click_slot():
         # Format a class dd to be a string
         # with no leading or trailing whitespace
-        print(list_widget.currentItem().text())
         class_id = list_widget.currentItem().text()
         if class_id[0] == " ":
             class_id = str(class_id[1:5])
