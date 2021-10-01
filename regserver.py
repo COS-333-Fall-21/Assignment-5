@@ -100,7 +100,7 @@ def get_classes(query_args):
 
 
 # query DB for all details of one class with id class_id
-def get_details(class_id):
+def get_details(class_id, sock):
     try:
         with connect(DATABASE_URL, uri=True) as connection:
             cursor = connection.cursor()
@@ -277,12 +277,27 @@ def get_details(class_id):
             "no class with class id %s exists" % class_id, file=stderr
         )
         # can't exit, need to pass the valueerror to the front and display it to the user
-        exit(2)
+        send_error_to_client(ex, sock)
 
     # Catch all other exceptions
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
         exit(1)
+
+
+# Tell the client if there's a DB error
+def send_error_to_client(ex, sock):
+    # confirm that the server has data for the client
+    out_flo = sock.makefile(mode="wb")
+    dump(False, out_flo)
+    out_flo.flush()
+    print("Wrote True to client")
+
+    # Send the data to the client
+    out_flo = sock.makefile(mode="wb")
+    dump(ex, out_flo)
+    out_flo.flush()
+    print("Wrote data to client")
 
 
 def handle_client(sock):
@@ -293,15 +308,21 @@ def handle_client(sock):
 
     # Choose which DB query to use based on type of data from client
     if isinstance(client_data, dict):
-        server_data = get_classes(client_data)
+        server_data = get_classes(client_data, sock)
     elif isinstance(client_data, str):
-        server_data = get_details(client_data)
+        server_data = get_details(client_data, sock)
 
-    # Send the list of rows to the server
+    # confirm that the server has data for the client
+    out_flo = sock.makefile(mode="wb")
+    dump(True, out_flo)
+    out_flo.flush()
+    print("Wrote True to client")
+
+    # Send the data to the client
     out_flo = sock.makefile(mode="wb")
     dump(server_data, out_flo)
     out_flo.flush()
-    print("Wrote to client")
+    print("Wrote data to client")
 
 
 def main():
