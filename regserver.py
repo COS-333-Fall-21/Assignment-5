@@ -158,7 +158,9 @@ def get_details(class_id):
 
                 # skip appending coursenum again, just append
                 # area, title, descrip, and prereqs
-                results.append(rows[0][1:])
+                #results.append(rows[0][1:])
+                for i in range(len(results)-1):
+                    results.append(rows[0][i+1])
 
                 #-----------------------------------------#
                 # select rows from coursesprofs table where courseid = classes.courseid
@@ -196,7 +198,7 @@ def get_details(class_id):
 
                     prof_data = cursor.fetchall()
                     results[RESULTS_PROFNAME_INDEX].append(
-                        prof_data[QUERY_PROFNAME_INDEX])
+                        prof_data[0][QUERY_PROFNAME_INDEX])
 
                 return results
 
