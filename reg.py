@@ -120,9 +120,9 @@ def get_overviews(class_info, host, port, window):
             if success:
                 # Read the list of rows from the server
                 classes = load(in_flo)
-                in_flo.close()
             else:
                 raise load(in_flo)
+            in_flo.close()
 
         return classes
 
@@ -178,9 +178,9 @@ def get_detail(class_id, host, port, window):
             if success:
                 # Read the list of tuples from the server
                 details = load(in_flo)
-                in_flo.close()
             else:
                 raise load(in_flo)
+            in_flo.close()
 
         return details
 
