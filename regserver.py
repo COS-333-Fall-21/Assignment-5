@@ -226,12 +226,12 @@ def get_detail(class_id, sock):
     except OperationalError as ex:
         # tell the client there was an error
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        send_error_to_client(ex, sock)
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        send_error_to_client(ex, sock)
 
     # Class with class id does not exist
     except ValueError as ex:
