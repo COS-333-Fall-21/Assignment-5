@@ -125,9 +125,9 @@ def get_overviews(class_info, host, port, window):
 
         return classes
 
-    except ConnectionRefusedError as ex:
+    except ConnectionError as ex:
         message = "%s: " % argv[0] + str(ex)
-        QMessageBox.information(window, "Connection Refused", message)
+        QMessageBox.information(window, "Server Unavailable", message)
     except Exception as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred. Please contact the system administrator."
@@ -163,10 +163,10 @@ def get_detail(class_id, host, port, window):
 
         return details
 
-    except ConnectionRefusedError as ex:
+    except ConnectionError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
-        QMessageBox.information(window, "Connection Refused", message)
+        QMessageBox.information(window, "Server Unavailable", message)
     except ValueError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "No class with class id " + class_id + " exists."
