@@ -1,0 +1,52 @@
+abaroody_aziff
+
+Names: Alex Baroody, Adam Ziff
+Assignment: 2
+
+What Alex Baroody contributed to this Assignment:
+I typed during the pair programming of reg.py.
+Afterwards, I focused my time on making the GUI
+and connecting to the server. I also parsed the arguments
+for both reg.py and regserver.py, reading the documentation
+in order to make sure that the points we lost last time
+wouldn't be lost this time. Next, I went through the
+assignment specs and made sure all of the errors were
+handled. I also performed lots of the initial debugging,
+while Adam and I worked together to do most of the testing.
+Finally, I developed an intimate relationship with pylint
+as I edited, checked, and edited the code again to conform
+with pylint's standards. Specifically, I refactored a lot
+of our code into helper methods and more distinct blocks,
+as well as making lots of constants to avoid hard coding
+numbers.
+
+What Adam Ziff contributed to this Assignment:
+I did the initial creation and setup for reserver.py,
+bringing over the relevant code from Assignment 1. I pair
+programmed with Alex for setting up the GUI in reg.py. I
+also wrote our get_detail() database query in reserver.py
+to match the style detailed in Prof. Dondero’s Ed post,
+turning it from one big query into multiple smaller queries
+and returning a cleaner array of only the data we need
+instead of a massive array of tuples with each db row. I
+helped debug and test both programs, running the reference
+programs while Alex ran our programs and pointed out several
+key distinctions including the need to sort Professors and
+Crosslistings.
+
+Resources: (NOTE: do we have to cite our own re-used code? do we have to include all the same links from Assignment 1?)
+https://www.delftstack.com/howto/python/stringbuilder-in-python/
+https://javahungry.blogspot.com/2021/05/charat-python.html
+https://stackoverflow.com/questions/15561608/detecting-enter-on-a-qlineedit-or-qpushbutton  
+https://stackoverflow.com/questions/3382352/equivalent-of-numpy-argsort-in-basic-python
+
+Assignment Assessment:
+This assignment was fun! The GUI is much nicer than the
+command line; however, it's more challenging to test.
+There were a lot more corner cases/exceptions this time,
+and having to rewrite one of our queries took a long time.
+
+Time Spent:
+12 hours total
+8 hours of pair programming
+4 hours each of individual programming
