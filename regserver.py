@@ -16,8 +16,19 @@ COURSE_NUM_INDEX = 2
 AREA_INDEX = 3
 TITLE_INDEX = 4
 
+COURSE_ID_INDEX = 1
+
+QUERY_DEPT_INDEX = 1
+QUERY_COURSENUM_INDEX = 2
+RESULTS_DEPT_INDEX = 7
+
+QUERY_PROFID_INDEX = 1
+
+QUERY_PROFNAME_INDEX = 1
+RESULTS_PROFNAME_INDEX = 12
+
 # parse the given array for the host and port
-def parse_args(argv):
+def parse_args(args):
     parser = ArgumentParser(
         description="Server for the registrar application",
         allow_abbrev=False,
@@ -29,12 +40,12 @@ def parse_args(argv):
         help="the port at which the server should listen",
     )
 
-    namespace = parser.parse_args(argv[1:])
+    namespace = parser.parse_args(args[1:])
     return vars(namespace)
 
 
 # query DB for all class rows that meet the parameters
-def get_overviews(query_args):
+def get_overviews(query_args, sock):
     for key in query_args.keys():
         query_args[key] = query_args[key].lower()
     try:
@@ -84,12 +95,12 @@ def get_overviews(query_args):
     # Database cannot be opened
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        send_error_to_client(ex, sock)
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+        send_error_to_client(ex, sock)
 
     # Catch all other exceptions
     except Exception as ex:
@@ -125,7 +136,6 @@ def get_detail(class_id, sock):
                 if len(results) == 0:
                     raise ValueError
 
-                COURSE_ID_INDEX = 1
                 courseid = results[COURSE_ID_INDEX]
                 # -----------------------------------------#
                 # select rows in crosslistings table where
@@ -139,9 +149,6 @@ def get_detail(class_id, sock):
 
                 rows = cursor.fetchall()
 
-                QUERY_DEPT_INDEX = 1
-                QUERY_COURSENUM_INDEX = 2
-                RESULTS_DEPT_INDEX = 7
                 results.append([])
                 for row in rows:
                     results[RESULTS_DEPT_INDEX].append(
@@ -156,7 +163,8 @@ def get_detail(class_id, sock):
                 if len(rows) == 0:
                     raise ValueError
                 # -----------------------------------------#
-                # select row from courses table where courseid = classes.courseid
+                # select row from courses table where
+                # courseid = classes.courseid
                 stmt_str = "SELECT * "
                 stmt_str += "FROM courses "
                 stmt_str += "WHERE courses.courseid = ? "
@@ -189,7 +197,6 @@ def get_detail(class_id, sock):
                 rows = cursor.fetchall()
 
                 # save all profids to use in the next query
-                QUERY_PROFID_INDEX = 1
                 profids = []
                 for row in rows:
                     profids.append(row[QUERY_PROFID_INDEX])
@@ -202,8 +209,6 @@ def get_detail(class_id, sock):
                 stmt_str += "WHERE profs.profid = ? "
 
                 results.append([])
-                QUERY_PROFNAME_INDEX = 1
-                RESULTS_PROFNAME_INDEX = 12
 
                 for profid in profids:
                     # execute the query
@@ -270,7 +275,7 @@ def handle_client(sock):
     server_data = None
     if isinstance(client_data, dict):
         print("Recieved command: get_overviews")
-        server_data = get_overviews(client_data)
+        server_data = get_overviews(client_data, sock)
     elif isinstance(client_data, str):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)

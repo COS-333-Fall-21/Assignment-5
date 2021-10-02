@@ -33,7 +33,7 @@ PREREQ_INDEX = 11
 PROF_INDEX = 12
 
 # parse the given array for the host and port
-def parse_args(argv):
+def parse_args(args):
     parser = ArgumentParser(
         description="Client for the registrar application",
         allow_abbrev=False,
@@ -50,7 +50,7 @@ def parse_args(argv):
         help="the port at which the server is listening",
     )
 
-    namespace = parser.parse_args(argv[1:])
+    namespace = parser.parse_args(args[1:])
     return vars(namespace)
 
 
@@ -135,13 +135,15 @@ def get_overviews(class_info, host, port, window):
     # Database cannot be opened
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred. Please contact the system administrator."
+        message = "A server error occurred."
+        message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred. Please contact the system administrator."
+        message = "A server error occurred."
+        message = +"Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
 
     # Catch all other exceptions
@@ -194,13 +196,15 @@ def get_detail(class_id, host, port, window):
     # Database cannot be opened
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred. Please contact the system administrator."
+        message = "A server error occurred."
+        message = +"Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred. Please contact the system administrator."
+        message = "A server error occurred."
+        message = +"Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
 
     # Catch all other exceptions
@@ -238,6 +242,7 @@ def set_layout(window, host, port):
             list_widget.activated.connect(list_click_slot)
             add_list_widget(layout, list_widget)
             return list_widget
+        return None
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
