@@ -1,5 +1,6 @@
 # reg.py
 from argparse import ArgumentParser
+from sqlite3.dbapi2 import DatabaseError, OperationalError
 from sys import exit, argv, stderr
 from socket import socket
 from pickle import load, dump
@@ -125,13 +126,28 @@ def get_overviews(class_info, host, port, window):
 
         return classes
 
+    # Server is unavailable
     except ConnectionRefusedError as ex:
+        print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Server Unavailable", message)
-    except Exception as ex:
+
+    # Database cannot be opened
+    except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred. Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+
+    # Database is corrupted
+    except DatabaseError as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        message = "A server error occurred. Please contact the system administrator."
+        QMessageBox.information(window, "Server Error", message)
+
+    # Catch all other exceptions
+    except Exception as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        exit(1)
 
 
 # Sends the class Id to the server
@@ -163,18 +179,34 @@ def get_detail(class_id, host, port, window):
 
         return details
 
+    # Server is unavailable
     except ConnectionRefusedError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Server Unavailable", message)
+
+    # Class with given class id does not exist
     except ValueError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "No class with class id " + class_id + " exists."
         QMessageBox.information(window, "Server Error", message)
-    except Exception as ex:
+
+    # Database cannot be opened
+    except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred. Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+
+    # Database is corrupted
+    except DatabaseError as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        message = "A server error occurred. Please contact the system administrator."
+        QMessageBox.information(window, "Server Error", message)
+
+    # Catch all other exceptions
+    except Exception as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        exit(1)
 
 
 # 5 rows by 3 columns
