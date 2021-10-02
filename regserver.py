@@ -4,7 +4,6 @@ from sys import exit, argv, stderr
 from socket import socket, SOL_SOCKET, SO_REUSEADDR
 from pickle import load, dump
 from os import name
-import argparse
 from sqlite3 import connect, OperationalError, DatabaseError
 from contextlib import closing
 
@@ -96,11 +95,13 @@ def get_overviews(query_args, sock):
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         send_error_to_client(ex, sock)
+        return None
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         send_error_to_client(ex, sock)
+        return None
 
     # Catch all other exceptions
     except Exception as ex:
@@ -232,11 +233,13 @@ def get_detail(class_id, sock):
         # tell the client there was an error
         print("%s: " % argv[0], ex, file=stderr)
         send_error_to_client(ex, sock)
+        return None
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         send_error_to_client(ex, sock)
+        return None
 
     # Class with class id does not exist
     except ValueError as ex:
@@ -244,6 +247,7 @@ def get_detail(class_id, sock):
             "no class with class id %s exists" % class_id, file=stderr
         )
         send_error_to_client(ex, sock)
+        return None
 
     # Catch all other exceptions
     except Exception as ex:
@@ -280,7 +284,7 @@ def handle_client(sock):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)
 
-    if server_data != None:
+    if server_data is not None:
         # confirm that the server has data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)
@@ -310,7 +314,7 @@ def main():
         print("Listening")
         while True:
             try:
-                sock, client_addr = server_sock.accept()
+                sock, _ = server_sock.accept()
                 with sock:
                     print("Accepted connection, opened socket")
                     handle_client(sock)

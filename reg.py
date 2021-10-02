@@ -116,6 +116,7 @@ def get_overviews(class_info, host, port, window):
             success = load(in_flo)
             in_flo.close()
 
+            classes = None
             in_flo = sock.makefile(mode="rb")
             if success:
                 # Read the list of rows from the server
@@ -131,6 +132,7 @@ def get_overviews(class_info, host, port, window):
         print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Server Unavailable", message)
+        return None
 
     # Database cannot be opened
     except OperationalError as ex:
@@ -138,13 +140,15 @@ def get_overviews(class_info, host, port, window):
         message = "A server error occurred."
         message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+        return None
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred."
-        message = +"Please contact the system administrator."
+        message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+        return None
 
     # Catch all other exceptions
     except Exception as ex:
@@ -186,26 +190,30 @@ def get_detail(class_id, host, port, window):
         print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Server Unavailable", message)
+        return None
 
     # Class with given class id does not exist
     except ValueError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "No class with class id " + class_id + " exists."
         QMessageBox.information(window, "Server Error", message)
+        return None
 
     # Database cannot be opened
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred."
-        message = +"Please contact the system administrator."
+        message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+        return None
 
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
         message = "A server error occurred."
-        message = +"Please contact the system administrator."
+        message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
+        return None
 
     # Catch all other exceptions
     except Exception as ex:
