@@ -109,6 +109,124 @@ def get_overviews(query_args, sock):
         exit(1)
 
 
+# get the class with class Id class_id and append to results
+def get_class(results, cursor, class_id):
+    # select row in classes table with classid class_id
+    stmt_str = "SELECT * "
+    stmt_str += "FROM classes "
+    stmt_str += "WHERE classes.classid = ? "
+
+    # execute the query
+    cursor.execute(stmt_str, [class_id])
+
+    rows = cursor.fetchall()
+
+    # append all elements from this query
+    for row in rows:
+        for element in row:
+            results.append(element)
+
+    # throw an error if there is no matching class
+    if len(results) == 0:
+        raise ValueError
+
+
+# get the crosslistings associated with course Id courseid
+# and append to results
+def get_crosslistings(results, cursor, courseid):
+    # select rows in crosslistings table where
+    # courseid = classes.courseid
+    stmt_str = "SELECT * "
+    stmt_str += "FROM crosslistings "
+    stmt_str += "WHERE crosslistings.courseid = ? "
+
+    # execute the query
+    cursor.execute(stmt_str, [courseid])
+
+    rows = cursor.fetchall()
+
+    results.append([])
+    for row in rows:
+        results[RESULTS_DEPT_INDEX].append(
+            row[QUERY_DEPT_INDEX] + " " + row[QUERY_COURSENUM_INDEX]
+        )
+
+    results[RESULTS_DEPT_INDEX].sort()
+
+    # throw an error if there is no matching course
+    if len(rows) == 0:
+        raise ValueError
+
+
+# get the course associated with course Id courseid
+# and append to results
+def get_course(results, cursor, courseid):
+    # select row from courses table where
+    # courseid = classes.courseid
+    stmt_str = "SELECT * "
+    stmt_str += "FROM courses "
+    stmt_str += "WHERE courses.courseid = ? "
+
+    # execute the query
+    cursor.execute(stmt_str, [courseid])
+
+    rows = cursor.fetchall()
+
+    # throw an error if there is no matching course
+    if len(rows) == 0:
+        raise ValueError
+
+    # skip appending coursenum again, just append
+    # area, title, descrip, and prereqs
+    # results.append(rows[0][1:])
+    for i in range(len(rows[0]) - 1):
+        results.append(rows[0][i + 1])
+
+
+# get the profs associated with the course with
+# course Id course id and append to results
+def get_profs(results, cursor, courseid):
+    # select rows from coursesprofs table where
+    # courseid = classes.courseid
+    stmt_str = "SELECT * "
+    stmt_str += "FROM coursesprofs "
+    stmt_str += "WHERE coursesprofs.courseid = ? "
+
+    # execute the query
+    cursor.execute(stmt_str, [courseid])
+
+    rows = cursor.fetchall()
+
+    # save all profids to use in the next query
+    profids = []
+    for row in rows:
+        profids.append(row[QUERY_PROFID_INDEX])
+
+    # don't throw an error- there can be zero profs
+    # -----------------------------------------#
+    # select rows from profs table for all selected profids
+    stmt_str = "SELECT * "
+    stmt_str += "FROM profs "
+    stmt_str += "WHERE profs.profid = ? "
+
+    results.append([])
+
+    for profid in profids:
+        # execute the query
+        cursor.execute(stmt_str, [profid])
+
+        prof_data = cursor.fetchall()
+        results[RESULTS_PROFNAME_INDEX].append(
+            prof_data[0][QUERY_PROFNAME_INDEX]
+        )
+
+    results[RESULTS_PROFNAME_INDEX].sort()
+
+    # append the empty string if there are no profs
+    if len(profids) == 0:
+        results[RESULTS_PROFNAME_INDEX].append("")
+
+
 # query DB for all details of one class with id class_id
 def get_detail(class_id, sock):
     try:
@@ -117,114 +235,15 @@ def get_detail(class_id, sock):
 
             with closing(connection.cursor()) as cursor:
                 results = []
-                # -------------------------------------------------#
-                # select row in classes table with classid class_id
-                stmt_str = "SELECT * "
-                stmt_str += "FROM classes "
-                stmt_str += "WHERE classes.classid = ? "
 
-                # execute the query
-                cursor.execute(stmt_str, [class_id])
-
-                rows = cursor.fetchall()
-
-                # append all elements from this query
-                for row in rows:
-                    for element in row:
-                        results.append(element)
-
-                # throw an error if there is no matching class
-                if len(results) == 0:
-                    raise ValueError
+                get_class(results, cursor, class_id)
 
                 courseid = results[COURSE_ID_INDEX]
-                # -----------------------------------------#
-                # select rows in crosslistings table where
-                # courseid = classes.courseid
-                stmt_str = "SELECT * "
-                stmt_str += "FROM crosslistings "
-                stmt_str += "WHERE crosslistings.courseid = ? "
+                get_crosslistings(results, cursor, courseid)
 
-                # execute the query
-                cursor.execute(stmt_str, [courseid])
+                get_course(results, cursor, courseid)
 
-                rows = cursor.fetchall()
-
-                results.append([])
-                for row in rows:
-                    results[RESULTS_DEPT_INDEX].append(
-                        row[QUERY_DEPT_INDEX]
-                        + " "
-                        + row[QUERY_COURSENUM_INDEX]
-                    )
-
-                results[RESULTS_DEPT_INDEX].sort()
-
-                # throw an error if there is no matching course
-                if len(rows) == 0:
-                    raise ValueError
-                # -----------------------------------------#
-                # select row from courses table where
-                # courseid = classes.courseid
-                stmt_str = "SELECT * "
-                stmt_str += "FROM courses "
-                stmt_str += "WHERE courses.courseid = ? "
-
-                # execute the query
-                cursor.execute(stmt_str, [courseid])
-
-                rows = cursor.fetchall()
-
-                # throw an error if there is no matching course
-                if len(rows) == 0:
-                    raise ValueError
-
-                # skip appending coursenum again, just append
-                # area, title, descrip, and prereqs
-                # results.append(rows[0][1:])
-                for i in range(len(rows[0]) - 1):
-                    results.append(rows[0][i + 1])
-
-                # -----------------------------------------#
-                # select rows from coursesprofs table where
-                # courseid = classes.courseid
-                stmt_str = "SELECT * "
-                stmt_str += "FROM coursesprofs "
-                stmt_str += "WHERE coursesprofs.courseid = ? "
-
-                # execute the query
-                cursor.execute(stmt_str, [courseid])
-
-                rows = cursor.fetchall()
-
-                # save all profids to use in the next query
-                profids = []
-                for row in rows:
-                    profids.append(row[QUERY_PROFID_INDEX])
-
-                # don't throw an error- there can be zero profs
-                # -----------------------------------------#
-                # select rows from profs table for all selected profids
-                stmt_str = "SELECT * "
-                stmt_str += "FROM profs "
-                stmt_str += "WHERE profs.profid = ? "
-
-                results.append([])
-
-                for profid in profids:
-                    # execute the query
-                    cursor.execute(stmt_str, [profid])
-
-                    prof_data = cursor.fetchall()
-                    results[RESULTS_PROFNAME_INDEX].append(
-                        prof_data[0][QUERY_PROFNAME_INDEX]
-                    )
-
-                results[RESULTS_PROFNAME_INDEX].sort()
-
-                # append the empty string if there are no profs
-                if len(profids) == 0:
-                    results[RESULTS_PROFNAME_INDEX].append("")
+                get_profs(results, cursor, courseid)
 
                 return results
 
@@ -319,12 +338,12 @@ def main():
                     print("Accepted connection, opened socket")
                     handle_client(sock)
             except Exception as ex:
-                # TODO: actualy handle exceptions
+                # TODO: actually handle exceptions
                 print(ex, file=stderr)
                 exit(1)
 
     except Exception as ex:
-        # TODO: actualy handle exceptions
+        # TODO: actually handle exceptions
         print(ex, file=stderr)
         exit(1)
 

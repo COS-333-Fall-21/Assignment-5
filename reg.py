@@ -116,7 +116,6 @@ def get_overviews(class_info, host, port, window):
             success = load(in_flo)
             in_flo.close()
 
-            classes = None
             in_flo = sock.makefile(mode="rb")
             if success:
                 # Read the list of rows from the server
