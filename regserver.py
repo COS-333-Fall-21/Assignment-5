@@ -336,13 +336,20 @@ def main():
                 with sock:
                     print("Accepted connection, opened socket")
                     handle_client(sock)
+
+            except ConnectionError as ex:
+                print("%s: " % argv[0], ex, file=stderr)
+                exit(1)
+
             except Exception as ex:
-                # TODO: actually handle exceptions
                 print(ex, file=stderr)
                 exit(1)
 
+    except ConnectionError as ex:
+        print("%s: " % argv[0], ex, file=stderr)
+        exit(1)
+
     except Exception as ex:
-        # TODO: actually handle exceptions
         print(ex, file=stderr)
         exit(1)
 
