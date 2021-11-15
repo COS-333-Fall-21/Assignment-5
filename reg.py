@@ -17,7 +17,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QTimer
 from safequeue import SafeQueue
+from threading import Thread
 
 # Constants for formatting class details
 ID_INDEX = 1
@@ -223,14 +225,28 @@ def get_detail(class_id, host, port, window):
 
 # 5 rows by 3 columns
 def set_layout(window, host, port):
+    queue = SafeQueue()
+    def poll_queue():
+        poll_queue_helper(queue, layout)
+    timer = QTimer()
+    timer.timeout.connect(poll_queue)
+    timer.setInterval(100) # milliseconds
+    timer.start()
+
+    worker_thread = None
     # Function for when the submit button is clicked (or equivalent)
     def submit_button_slot():
+        nonlocal worker_thread
         class_info = {
             "dept": dept_edit.text(),
             "num": num_edit.text(),
             "area": area_edit.text(),
             "title": title_edit.text(),
         }
+
+        if worker_thread is not None:
+            worker_thread.stop()
+        worker_thread = WorkerThread(host, port, class_info, queue)
 
         list_fill_info = get_overviews(class_info, host, port, window)
         update_list_widget(list_widget, list_fill_info)
