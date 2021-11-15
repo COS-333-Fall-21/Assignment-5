@@ -7,6 +7,7 @@ from os import name
 from sqlite3 import connect, OperationalError, DatabaseError
 from contextlib import closing
 from time import process_time
+from multiprocessing import Process
 
 DATABASE_URL = "file:reg.sqlite?mode=ro"
 
@@ -353,7 +354,11 @@ def main():
                 sock, _ = server_sock.accept()
                 with sock:
                     print("Accepted connection, opened socket")
-                    handle_client(sock, delay)
+                    process = Process(
+                        target=handle_client, 
+                        args=[sock, delay]
+                        )
+                    process.start()
 
             except ConnectionError as ex:
                 print("%s: " % argv[0], ex, file=stderr)
