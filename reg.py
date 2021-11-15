@@ -103,59 +103,30 @@ def update_list_widget(list_widget, rows):
 # Sends a dict to the server with class info
 # returns a list of row tuples
 def get_overviews(class_info, host, port, window):
-    try:
-        with socket() as sock:
-            sock.connect((host, port))
+    with socket() as sock:
+        sock.connect((host, port))
 
-            # Send the class info dict to the server
-            out_flo = sock.makefile(mode="wb")
-            dump(class_info, out_flo)
-            out_flo.flush()
+        # Send the class info dict to the server
+        out_flo = sock.makefile(mode="wb")
+        dump(class_info, out_flo)
+        out_flo.flush()
 
-            print("sent command: get_overviews")
+        print("sent command: get_overviews")
 
-            # Read in a boolean stating if we were successful
-            in_flo = sock.makefile(mode="rb")
-            success = load(in_flo)
-            in_flo.close()
+        # Read in a boolean stating if we were successful
+        in_flo = sock.makefile(mode="rb")
+        success = load(in_flo)
+        in_flo.close()
 
-            in_flo = sock.makefile(mode="rb")
-            if success:
-                # Read the list of rows from the server
-                classes = load(in_flo)
-            else:
-                raise load(in_flo)
-            in_flo.close()
+        in_flo = sock.makefile(mode="rb")
+        if success:
+            # Read the list of rows from the server
+            classes = load(in_flo)
+        else:
+            raise load(in_flo)
+        in_flo.close()
 
-        return classes
-
-    # Server is unavailable
-    except ConnectionRefusedError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "%s: " % argv[0] + str(ex)
-        QMessageBox.information(window, "Server Unavailable", message)
-        return None
-
-    # Database cannot be opened
-    except OperationalError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
-        message += "Please contact the system administrator."
-        QMessageBox.information(window, "Server Error", message)
-        return None
-
-    # Database is corrupted
-    except DatabaseError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
-        message += "Please contact the system administrator."
-        QMessageBox.information(window, "Server Error", message)
-        return None
-
-    # Catch all other exceptions
-    except Exception as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+    return classes
 
 
 # Sends the class Id to the server
@@ -283,13 +254,41 @@ class WorkerThread(Thread):
             )
             if not self._should_stop:
                 self._queue.put((True, classes))
-        except Exception as ex:
+
+        # Server is unavailable
+        except ConnectionRefusedError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "%s: " % argv[0] + str(ex)
+            title = "Server Unavailable"
             if not self._should_stop:
-                self._queue.put((False, ex))
+                self._queue.put((False, (title, message)))
+
+        # Database cannot be opened
+        except OperationalError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "A server error occurred."
+            message += "Please contact the system administrator."
+            title = "Server Unavailable"
+            if not self._should_stop:
+                self._queue.put((False, (title, message)))
+
+        # Database is corrupted
+        except DatabaseError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "A server error occurred."
+            message += "Please contact the system administrator."
+            title = "Server Unavailable"
+            if not self._should_stop:
+                self._queue.put((False, (title, message)))
+
+        except Exception as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            title = "Error"
+            if not self._should_stop:
+                self._queue.put((False, (title, str(ex))))
 
 
-def poll_queue_helper(queue, list_widget):
-
+def poll_queue_helper(queue, list_widget, window):
     item = queue.get()
     while item is not None:
         list_widget.clear()
@@ -302,9 +301,8 @@ def poll_queue_helper(queue, list_widget):
                     list_widget.insertItem(i, row_to_string(row))
                     i = i + 1
         else:
-            ex = data
-            print("%s: " % argv[0], ex, file=stderr)
-            exit(1)
+            title, message = data
+            QMessageBox.information(window, title, message)
         list_widget.repaint()
         list_widget.setCurrentRow(0)
         item = queue.get()
@@ -398,7 +396,7 @@ def main():
     queue = SafeQueue()
 
     def poll_queue():
-        poll_queue_helper(queue, list_widget)
+        poll_queue_helper(queue, list_widget, window)
 
     timer = QTimer()
     timer.timeout.connect(poll_queue)
