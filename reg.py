@@ -131,7 +131,7 @@ def get_overviews(class_info, host, port, window):
         print("%s: " % argv[0], ex, file=stderr)
         message = "%s: " % argv[0] + str(ex)
         QMessageBox.information(window, "Server Unavailable", message)
-        return None
+        return []
 
     # Database cannot be opened
     except OperationalError as ex:
@@ -139,7 +139,7 @@ def get_overviews(class_info, host, port, window):
         message = "A server error occurred."
         message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
-        return None
+        return []
 
     # Database is corrupted
     except DatabaseError as ex:
@@ -147,7 +147,7 @@ def get_overviews(class_info, host, port, window):
         message = "A server error occurred."
         message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
-        return None
+        return []
 
     # Catch all other exceptions
     except Exception as ex:
@@ -244,12 +244,11 @@ def set_layout(window, host, port):
         }
 
         list_fill_info = get_overviews(class_info, host, port, window)
-        if list_fill_info is not None:
-            list_widget = create_list_widget(list_fill_info)
-            list_widget.activated.connect(list_click_slot)
-            add_list_widget(layout, list_widget)
-            return list_widget
-        return None
+        list_widget = create_list_widget(list_fill_info)
+        list_widget.setCurrentRow(0)
+        list_widget.activated.connect(list_click_slot)
+        add_list_widget(layout, list_widget)
+        return list_widget
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
@@ -304,6 +303,83 @@ def set_layout(window, host, port):
     # (i.e. a query with all empty strings)
     #  list_fill_info = dummy_rows
     list_widget = fetch_all_classes()
+
+    return layout
+
+
+def set_orig_layout(window, host, port):
+    # Function for when the submit button is clicked (or equivalent)
+    def submit_button_slot():
+        class_info = {
+            "dept": dept_edit.text(),
+            "num": num_edit.text(),
+            "area": area_edit.text(),
+            "title": title_edit.text(),
+        }
+
+        list_fill_info = get_overviews(class_info, host, port, window)
+        update_list_widget(list_widget, list_fill_info)
+        add_list_widget(layout, list_widget)
+
+    def build_empty_list():
+        list_widget = create_list_widget([])
+        list_widget.activated.connect(list_click_slot)
+        add_list_widget(layout, list_widget)
+        return list_widget
+
+    # Function for when a list item is double clicked (or equivalent)
+    def list_click_slot():
+        # Format a class dd to be a string
+        # with no leading or trailing whitespace
+        class_id = list_widget.currentItem().text()
+        if class_id[0] == " ":
+            class_id = str(class_id[1:5])
+        else:
+            class_id = str(class_id[:5])
+
+        #   results = dummy_details
+
+        results = get_detail(class_id, host, port, window)
+        if results is not None:
+            message = format_results(results)
+
+            #   Activate the dialogue box with the appropriate detail
+            QMessageBox.information(window, "Class Details", message)
+
+    # Add a list widget to the layout
+    def add_list_widget(layout, list_widget):
+        layout.addWidget(list_widget, 4, 0, 1, 3)
+
+    # Create the layout
+    layout = QGridLayout()
+
+    layout = add_labels(layout)
+
+    # Create the four input fields & connect them to the submit function
+    dept_edit = QLineEdit()
+    dept_edit.returnPressed.connect(submit_button_slot)
+    num_edit = QLineEdit()
+    num_edit.returnPressed.connect(submit_button_slot)
+    area_edit = QLineEdit()
+    area_edit.returnPressed.connect(submit_button_slot)
+    title_edit = QLineEdit()
+    title_edit.returnPressed.connect(submit_button_slot)
+
+    # Add the line edits to the layout
+    layout.addWidget(dept_edit, 0, 1, 1, 1)
+    layout.addWidget(num_edit, 1, 1, 1, 1)
+    layout.addWidget(area_edit, 2, 1, 1, 1)
+    layout.addWidget(title_edit, 3, 1, 1, 1)
+
+    # Create the submit button & add it to the layout
+    submit_button = QPushButton("Submit")
+    submit_button.clicked.connect(submit_button_slot)
+    layout.addWidget(submit_button, 0, 2, 4, 1)
+
+    # Start by filling the list widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_widget = build_empty_list()
 
     return layout
 
@@ -381,9 +457,13 @@ def main():
 
     window = QMainWindow()
 
+    # layout = set_orig_layout(window, host, port)
+    frame = QFrame()
+    # frame.setLayout(layout)
+
     # Set the layout
     layout = set_layout(window, host, port)
-    frame = QFrame()
+    # window.deleteLayout(layout)
     frame.setLayout(layout)
 
     window.setWindowTitle("Princeton University Class Search")
