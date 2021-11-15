@@ -223,35 +223,110 @@ def get_detail(class_id, host, port, window):
         exit(1)
 
 
+def create_widgets():
+    # Create the layout
+    layout = QGridLayout()
+
+    layout = add_labels(layout)
+
+    # Create the four input fields & connect them to the submit function
+    dept_edit = QLineEdit()
+    dept_edit.textChanged.connect(submit_button_slot)
+    num_edit = QLineEdit()
+    num_edit.textChanged.connect(submit_button_slot)
+    area_edit = QLineEdit()
+    area_edit.textChanged.connect(submit_button_slot)
+    title_edit = QLineEdit()
+    title_edit.textChanged.connect(submit_button_slot)
+
+    # Add the line edits to the layout
+    layout.addWidget(dept_edit, 0, 1, 1, 1)
+    layout.addWidget(num_edit, 1, 1, 1, 1)
+    layout.addWidget(area_edit, 2, 1, 1, 1)
+    layout.addWidget(title_edit, 3, 1, 1, 1)
+
+    # Create the submit button & add it to the layout
+    submit_button = QPushButton("Submit")
+    submit_button.clicked.connect(submit_button_slot)
+    layout.addWidget(submit_button, 0, 2, 4, 1)
+
+    frame = QFrame()
+    frame.setLayout(layout)
+
+    window = QMainWindow()
+    window.setWindowTitle("Princeton University Class Search")
+    window.setCentralWidget(frame)
+    screen_size = QDesktopWidget().screenGeometry()
+    window.resize(screen_size.width() // 2, screen_size.height())
+
+    # Start by filling the list widget with all the classes
+    # (i.e. a query with all empty strings)
+    #  list_fill_info = dummy_rows
+    list_widget = create_list_widget([])
+    add_list_widget(layout, list_widget)
+
+    return (
+        window,
+        dept_edit,
+        num_edit,
+        area_edit,
+        title_edit,
+        submit_button,
+        list_widget,
+    )
+
+
+class WorkerThread(Thread):
+    def __init__(self, host, port, class_info, window, queue):
+        Thread.__init__(self)
+        self._host = host
+        self._port = port
+        self._class_info = class_info
+        self._window = window
+        self._queue = queue
+        self._should_stop = False
+
+    def stop(self):
+        self._should_stop = True
+
+    def run(self):
+        try:
+            classes = get_overviews(
+                self._class_info, self._host, self._port, self._window
+            )
+            if not self._should_stop:
+                self._queue.put((True, classes))
+        except Exception as ex:
+            if not self._should_stop:
+                self._queue.put((False, ex))
+
+
+# -----------------------------------------------------------------------
+
+
+def poll_queue_helper(queue, list_widget):
+
+    item = queue.get()
+    while item is not None:
+        list_widget.clear()
+        successful, data = item
+        if successful:
+            classes = data
+            if classes is not None:
+                i = 0
+                for row in classes:
+                    list_widget.insertItem(i, row_to_string(row))
+                    i = i + 1
+        else:
+            ex = data
+            print("%s: " % argv[0], ex, file=stderr)
+            exit(1)
+        list_widget.repaint()
+        item = queue.get()
+
+
 # 5 rows by 3 columns
 def set_layout(window, host, port):
-    queue = SafeQueue()
-    def poll_queue():
-        poll_queue_helper(queue, layout)
-    timer = QTimer()
-    timer.timeout.connect(poll_queue)
-    timer.setInterval(100) # milliseconds
-    timer.start()
-
-    worker_thread = None
-    # Function for when the submit button is clicked (or equivalent)
-    def submit_button_slot():
-        nonlocal worker_thread
-        class_info = {
-            "dept": dept_edit.text(),
-            "num": num_edit.text(),
-            "area": area_edit.text(),
-            "title": title_edit.text(),
-        }
-
-        if worker_thread is not None:
-            worker_thread.stop()
-        worker_thread = WorkerThread(host, port, class_info, queue)
-
-        list_fill_info = get_overviews(class_info, host, port, window)
-        update_list_widget(list_widget, list_fill_info)
-        add_list_widget(layout, list_widget)
-
     def fetch_all_classes():
         class_info = {
             "dept": "",
@@ -287,42 +362,10 @@ def set_layout(window, host, port):
             #   Activate the dialogue box with the appropriate detail
             QMessageBox.information(window, "Class Details", message)
 
-    # Add a list widget to the layout
-    def add_list_widget(layout, list_widget):
-        layout.addWidget(list_widget, 4, 0, 1, 3)
 
-    # Create the layout
-    layout = QGridLayout()
-
-    layout = add_labels(layout)
-
-    # Create the four input fields & connect them to the submit function
-    dept_edit = QLineEdit()
-    dept_edit.textChanged.connect(submit_button_slot)
-    num_edit = QLineEdit()
-    num_edit.textChanged.connect(submit_button_slot)
-    area_edit = QLineEdit()
-    area_edit.textChanged.connect(submit_button_slot)
-    title_edit = QLineEdit()
-    title_edit.textChanged.connect(submit_button_slot)
-
-    # Add the line edits to the layout
-    layout.addWidget(dept_edit, 0, 1, 1, 1)
-    layout.addWidget(num_edit, 1, 1, 1, 1)
-    layout.addWidget(area_edit, 2, 1, 1, 1)
-    layout.addWidget(title_edit, 3, 1, 1, 1)
-
-    # Create the submit button & add it to the layout
-    submit_button = QPushButton("Submit")
-    submit_button.clicked.connect(submit_button_slot)
-    layout.addWidget(submit_button, 0, 2, 4, 1)
-
-    # Start by filling the list widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    list_widget = fetch_all_classes()
-
-    return layout
+# Add a list widget to the layout
+def add_list_widget(layout, list_widget):
+    layout.addWidget(list_widget, 4, 0, 1, 3)
 
 
 # Helper method th add the labels to the layout
@@ -396,21 +439,47 @@ def main():
 
     app = QApplication(argv)
 
-    window = QMainWindow()
+    (
+        window,
+        dept_edit,
+        num_edit,
+        area_edit,
+        title_edit,
+        submit_button,
+        list_widget,
+    ) = create_widgets()
 
-    # Set the layout
-    layout = set_layout(window, host, port)
-    frame = QFrame()
-    frame.setLayout(layout)
+    queue = SafeQueue()
 
-    window.setWindowTitle("Princeton University Class Search")
-    window.setCentralWidget(frame)
-    screen_size = QDesktopWidget().screenGeometry()
-    window.resize(screen_size.width() // 2, screen_size.height())
+    def poll_queue():
+        poll_queue_helper(queue, list_widget)
 
-    # threading goes here
+    timer = QTimer()
+    timer.timeout.connect(poll_queue)
+    timer.setInterval(100)  # milliseconds
+    timer.start()
+
+    worker_thread = None
+    # Function for when the submit button is clicked (or equivalent)
+    def submit_button_slot():
+        nonlocal worker_thread
+        class_info = {
+            "dept": dept_edit.text(),
+            "num": num_edit.text(),
+            "area": area_edit.text(),
+            "title": title_edit.text(),
+        }
+
+        if worker_thread is not None:
+            worker_thread.stop()
+        worker_thread = WorkerThread(host, port, class_info, queue)
+
+        list_fill_info = get_overviews(class_info, host, port, window)
+        update_list_widget(list_widget, list_fill_info)
+        add_list_widget(layout, list_widget)
 
     window.show()
+
     exit(app.exec_())
 
 
