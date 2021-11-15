@@ -231,13 +231,9 @@ def create_widgets():
 
     # Create the four input fields & connect them to the submit function
     dept_edit = QLineEdit()
-    dept_edit.textChanged.connect(submit_button_slot)
     num_edit = QLineEdit()
-    num_edit.textChanged.connect(submit_button_slot)
     area_edit = QLineEdit()
-    area_edit.textChanged.connect(submit_button_slot)
     title_edit = QLineEdit()
-    title_edit.textChanged.connect(submit_button_slot)
 
     # Add the line edits to the layout
     layout.addWidget(dept_edit, 0, 1, 1, 1)
@@ -301,9 +297,6 @@ class WorkerThread(Thread):
                 self._queue.put((False, ex))
 
 
-# -----------------------------------------------------------------------
-
-
 def poll_queue_helper(queue, list_widget):
 
     item = queue.get()
@@ -323,44 +316,6 @@ def poll_queue_helper(queue, list_widget):
             exit(1)
         list_widget.repaint()
         item = queue.get()
-
-
-# 5 rows by 3 columns
-def set_layout(window, host, port):
-    def fetch_all_classes():
-        class_info = {
-            "dept": "",
-            "num": "",
-            "area": "",
-            "title": "",
-        }
-
-        list_fill_info = get_overviews(class_info, host, port, window)
-        if list_fill_info is not None:
-            list_widget = create_list_widget(list_fill_info)
-            list_widget.activated.connect(list_click_slot)
-            add_list_widget(layout, list_widget)
-            return list_widget
-        return None
-
-    # Function for when a list item is double clicked (or equivalent)
-    def list_click_slot():
-        # Format a class dd to be a string
-        # with no leading or trailing whitespace
-        class_id = list_widget.currentItem().text()
-        if class_id[0] == " ":
-            class_id = str(class_id[1:5])
-        else:
-            class_id = str(class_id[:5])
-
-        #   results = dummy_details
-
-        results = get_detail(class_id, host, port, window)
-        if results is not None:
-            message = format_results(results)
-
-            #   Activate the dialogue box with the appropriate detail
-            QMessageBox.information(window, "Class Details", message)
 
 
 # Add a list widget to the layout
@@ -474,9 +429,37 @@ def main():
             worker_thread.stop()
         worker_thread = WorkerThread(host, port, class_info, queue)
 
-        list_fill_info = get_overviews(class_info, host, port, window)
-        update_list_widget(list_widget, list_fill_info)
-        add_list_widget(layout, list_widget)
+        classes = get_overviews(class_info, host, port, window)
+        i = 0
+        for row in classes:
+            list_widget.insertItem(i, row_to_string(row))
+            i = i + 1
+
+    # Function for when a list item is double clicked (or equivalent)
+    def list_click_slot():
+        # Format a class dd to be a string
+        # with no leading or trailing whitespace
+        class_id = list_widget.currentItem().text()
+        if class_id[0] == " ":
+            class_id = str(class_id[1:5])
+        else:
+            class_id = str(class_id[:5])
+
+        #   results = dummy_details
+
+        results = get_detail(class_id, host, port, window)
+        if results is not None:
+            message = format_results(results)
+
+            #   Activate the dialogue box with the appropriate detail
+            QMessageBox.information(window, "Class Details", message)
+
+    # connect our widgets
+    dept_edit.textChanged.connect(submit_button_slot)
+    num_edit.textChanged.connect(submit_button_slot)
+    area_edit.textChanged.connect(submit_button_slot)
+    title_edit.textChanged.connect(submit_button_slot)
+    list_widget.activated.connect(list_click_slot)
 
     window.show()
 
