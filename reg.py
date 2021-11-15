@@ -241,6 +241,8 @@ def create_widgets():
     layout.addWidget(area_edit, 2, 1, 1, 1)
     layout.addWidget(title_edit, 3, 1, 1, 1)
 
+    list_widget = create_list_widget([])
+    add_list_widget(layout, list_widget)
 
     frame = QFrame()
     frame.setLayout(layout)
@@ -250,12 +252,6 @@ def create_widgets():
     window.setCentralWidget(frame)
     screen_size = QDesktopWidget().screenGeometry()
     window.resize(screen_size.width() // 2, screen_size.height())
-
-    # Start by filling the list widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    list_widget = create_list_widget([])
-    add_list_widget(layout, list_widget)
 
     return (
         window,
@@ -310,6 +306,7 @@ def poll_queue_helper(queue, list_widget):
             print("%s: " % argv[0], ex, file=stderr)
             exit(1)
         list_widget.repaint()
+        list_widget.setCurrentRow(0)
         item = queue.get()
 
 
@@ -421,13 +418,10 @@ def main():
 
         if worker_thread is not None:
             worker_thread.stop()
-        worker_thread = WorkerThread(host, port, class_info, queue)
-
-        classes = get_overviews(class_info, host, port, window)
-        i = 0
-        for row in classes:
-            list_widget.insertItem(i, row_to_string(row))
-            i = i + 1
+        worker_thread = WorkerThread(
+            host, port, class_info, window, queue
+        )
+        worker_thread.start()
 
     # Function for when a list item is double clicked (or equivalent)
     def list_click_slot():
@@ -456,7 +450,7 @@ def main():
     list_widget.activated.connect(list_click_slot)
 
     window.show()
-
+    form_input_slot()
     exit(app.exec_())
 
 
