@@ -6,6 +6,7 @@ from pickle import load, dump
 from os import name
 from sqlite3 import connect, OperationalError, DatabaseError
 from contextlib import closing
+from time import process_time
 
 DATABASE_URL = "file:reg.sqlite?mode=ro"
 
@@ -26,6 +27,12 @@ QUERY_PROFID_INDEX = 1
 QUERY_PROFNAME_INDEX = 1
 RESULTS_PROFNAME_INDEX = 12
 
+def consume_cpu_time(delay):
+    i = 0
+    initial_time = process_time()
+    while (process_time() - initial_time) < delay: 
+        i += 1
+
 # parse the given array for the host and port
 def parse_args(args):
     parser = ArgumentParser(
@@ -37,6 +44,12 @@ def parse_args(args):
         nargs=1,
         type=int,
         help="the port at which the server should listen",
+    )
+    parser.add_argument(
+        "delay",
+        nargs=1,
+        type=int,
+        help="the number of seconds the server should wait when called",
     )
 
     namespace = parser.parse_args(args[1:])
@@ -288,11 +301,14 @@ def send_error_to_client(ex, sock):
     out_flo.flush()
 
 
-def handle_client(sock):
+def handle_client(sock, delay):
     # Read data from the client
     in_flo = sock.makefile(mode="rb")
     client_data = load(in_flo)
     in_flo.close()
+
+    # Artificial delay
+    consume_cpu_time(delay)
 
     # Choose which DB query to use based on type of data from client
     server_data = None
@@ -321,6 +337,7 @@ def handle_client(sock):
 def main():
     parsed_args = parse_args(argv)
     port = parsed_args["port"][0]
+    delay = parsed_args["delay"][0]
 
     try:
         server_sock = socket()
@@ -336,7 +353,7 @@ def main():
                 sock, _ = server_sock.accept()
                 with sock:
                     print("Accepted connection, opened socket")
-                    handle_client(sock)
+                    handle_client(sock, delay)
 
             except ConnectionError as ex:
                 print("%s: " % argv[0], ex, file=stderr)
