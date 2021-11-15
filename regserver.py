@@ -322,7 +322,12 @@ def handle_client(sock, delay):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)
 
-    if server_data is not None and len(server_data) > 0:
+    if server_data is None:
+        # confirm that the server does not have data for the client
+        out_flo = sock.makefile(mode="wb")
+        dump(False, out_flo)
+        out_flo.flush()
+    elif len(server_data) == 0:
         # confirm that the server has data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)
@@ -330,17 +335,17 @@ def handle_client(sock, delay):
 
         # Send the data to the client
         out_flo = sock.makefile(mode="wb")
-        dump(server_data, out_flo)
+        dump([], out_flo)
         out_flo.flush()
     else:
         # confirm that the server does not have data for the client
         out_flo = sock.makefile(mode="wb")
-        dump(False, out_flo)
+        dump(True, out_flo)
         out_flo.flush()
 
         # Send an empty array to the client
         out_flo = sock.makefile(mode="wb")
-        dump([], out_flo)
+        dump(server_data, out_flo)
         out_flo.flush()
 
     print("Closed socket")
