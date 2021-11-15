@@ -229,7 +229,7 @@ def create_widgets():
 
     layout = add_labels(layout)
 
-    # Create the four input fields & connect them to the submit function
+    # Create the four input fields & connect them to the form input function
     dept_edit = QLineEdit()
     num_edit = QLineEdit()
     area_edit = QLineEdit()
@@ -241,10 +241,6 @@ def create_widgets():
     layout.addWidget(area_edit, 2, 1, 1, 1)
     layout.addWidget(title_edit, 3, 1, 1, 1)
 
-    # Create the submit button & add it to the layout
-    submit_button = QPushButton("Submit")
-    submit_button.clicked.connect(submit_button_slot)
-    layout.addWidget(submit_button, 0, 2, 4, 1)
 
     frame = QFrame()
     frame.setLayout(layout)
@@ -267,7 +263,6 @@ def create_widgets():
         num_edit,
         area_edit,
         title_edit,
-        submit_button,
         list_widget,
     )
 
@@ -400,7 +395,6 @@ def main():
         num_edit,
         area_edit,
         title_edit,
-        submit_button,
         list_widget,
     ) = create_widgets()
 
@@ -415,8 +409,8 @@ def main():
     timer.start()
 
     worker_thread = None
-    # Function for when the submit button is clicked (or equivalent)
-    def submit_button_slot():
+    # Function for when data is entered into the form
+    def form_input_slot():
         nonlocal worker_thread
         class_info = {
             "dept": dept_edit.text(),
@@ -455,10 +449,10 @@ def main():
             QMessageBox.information(window, "Class Details", message)
 
     # connect our widgets
-    dept_edit.textChanged.connect(submit_button_slot)
-    num_edit.textChanged.connect(submit_button_slot)
-    area_edit.textChanged.connect(submit_button_slot)
-    title_edit.textChanged.connect(submit_button_slot)
+    dept_edit.textChanged.connect(form_input_slot)
+    num_edit.textChanged.connect(form_input_slot)
+    area_edit.textChanged.connect(form_input_slot)
+    title_edit.textChanged.connect(form_input_slot)
     list_widget.activated.connect(list_click_slot)
 
     window.show()
