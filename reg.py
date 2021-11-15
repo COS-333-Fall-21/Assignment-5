@@ -282,13 +282,13 @@ def set_layout(window, host, port):
 
     # Create the four input fields & connect them to the submit function
     dept_edit = QLineEdit()
-    dept_edit.returnPressed.connect(submit_button_slot)
+    dept_edit.textChanged.connect(submit_button_slot)
     num_edit = QLineEdit()
-    num_edit.returnPressed.connect(submit_button_slot)
+    num_edit.textChanged.connect(submit_button_slot)
     area_edit = QLineEdit()
-    area_edit.returnPressed.connect(submit_button_slot)
+    area_edit.textChanged.connect(submit_button_slot)
     title_edit = QLineEdit()
-    title_edit.returnPressed.connect(submit_button_slot)
+    title_edit.textChanged.connect(submit_button_slot)
 
     # Add the line edits to the layout
     layout.addWidget(dept_edit, 0, 1, 1, 1)
@@ -391,6 +391,8 @@ def main():
     window.setCentralWidget(frame)
     screen_size = QDesktopWidget().screenGeometry()
     window.resize(screen_size.width() // 2, screen_size.height())
+
+    # threading goes here
 
     window.show()
     exit(app.exec_())
