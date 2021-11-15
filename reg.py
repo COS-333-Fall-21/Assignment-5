@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtGui import QFont
+from safequeue import SafeQueue
 
 # Constants for formatting class details
 ID_INDEX = 1
