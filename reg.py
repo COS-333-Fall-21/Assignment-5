@@ -102,7 +102,7 @@ def update_list_widget(list_widget, rows):
 
 # Sends a dict to the server with class info
 # returns a list of row tuples
-def get_overviews(class_info, host, port, window):
+def get_overviews(class_info, host, port):
     with socket() as sock:
         sock.connect((host, port))
 
@@ -169,7 +169,7 @@ def get_detail(class_id, host, port, window):
     # Database cannot be opened
     except OperationalError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
+        message = "A server error occurred. "
         message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
         return None
@@ -177,7 +177,7 @@ def get_detail(class_id, host, port, window):
     # Database is corrupted
     except DatabaseError as ex:
         print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
+        message = "A server error occurred. "
         message += "Please contact the system administrator."
         QMessageBox.information(window, "Server Error", message)
         return None
@@ -194,7 +194,8 @@ def create_widgets():
 
     layout = add_labels(layout)
 
-    # Create the four input fields & connect them to the form input function
+    # Create the four input fields &
+    # connect them to the form input function
     dept_edit = QLineEdit()
     num_edit = QLineEdit()
     area_edit = QLineEdit()
@@ -229,12 +230,11 @@ def create_widgets():
 
 
 class WorkerThread(Thread):
-    def __init__(self, host, port, class_info, window, queue):
+    def __init__(self, host, port, class_info, queue):
         Thread.__init__(self)
         self._host = host
         self._port = port
         self._class_info = class_info
-        self._window = window
         self._queue = queue
         self._should_stop = False
 
@@ -244,7 +244,7 @@ class WorkerThread(Thread):
     def run(self):
         try:
             classes = get_overviews(
-                self._class_info, self._host, self._port, self._window
+                self._class_info, self._host, self._port
             )
             if not self._should_stop:
                 self._queue.put((True, classes))
@@ -410,9 +410,7 @@ def main():
 
         if worker_thread is not None:
             worker_thread.stop()
-        worker_thread = WorkerThread(
-            host, port, class_info, window, queue
-        )
+        worker_thread = WorkerThread(host, port, class_info, queue)
         worker_thread.start()
 
     # Function for when a list item is double clicked (or equivalent)
