@@ -143,9 +143,6 @@ def get_detail(class_id, host, port, window):
             # Read in a boolean stating if we were successful
             in_flo = sock.makefile(mode="rb")
             success = load(in_flo)
-            in_flo.close()
-
-            in_flo = sock.makefile(mode="rb")
             if success:
                 # Read the list of tuples from the server
                 details = load(in_flo)
