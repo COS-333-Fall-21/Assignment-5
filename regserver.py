@@ -28,11 +28,13 @@ QUERY_PROFID_INDEX = 1
 QUERY_PROFNAME_INDEX = 1
 RESULTS_PROFNAME_INDEX = 12
 
+
 def consume_cpu_time(delay):
     i = 0
     initial_time = process_time()
-    while (process_time() - initial_time) < delay: 
+    while (process_time() - initial_time) < delay:
         i += 1
+
 
 # parse the given array for the host and port
 def parse_args(args):
@@ -296,8 +298,6 @@ def send_error_to_client(ex, sock):
     out_flo.flush()
 
     # Send the data to the client
-    out_flo = sock.makefile(mode="wb")
-    print()
     dump(ex, out_flo)
     out_flo.flush()
 
@@ -321,14 +321,11 @@ def handle_client(sock, delay):
         server_data = get_detail(client_data, sock)
 
     if server_data is not None:
-        # confirm that the server has data for the client
+        # confirm that the server does not have data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)
-        out_flo.flush()
 
-        # Send the data to the client
-        out_flo = sock.makefile(mode="wb")
-        print()
+        # Send an empty array to the client
         dump(server_data, out_flo)
         out_flo.flush()
 
@@ -355,9 +352,8 @@ def main():
                 with sock:
                     print("Accepted connection, opened socket")
                     process = Process(
-                        target=handle_client, 
-                        args=[sock, delay]
-                        )
+                        target=handle_client, args=[sock, delay]
+                    )
                     process.start()
 
             except ConnectionError as ex:

@@ -17,6 +17,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QTimer
+from safequeue import SafeQueue
+from threading import Thread
 
 # Constants for formatting class details
 ID_INDEX = 1
@@ -100,59 +103,27 @@ def update_list_widget(list_widget, rows):
 # Sends a dict to the server with class info
 # returns a list of row tuples
 def get_overviews(class_info, host, port, window):
-    try:
-        with socket() as sock:
-            sock.connect((host, port))
+    with socket() as sock:
+        sock.connect((host, port))
 
-            # Send the class info dict to the server
-            out_flo = sock.makefile(mode="wb")
-            dump(class_info, out_flo)
-            out_flo.flush()
+        # Send the class info dict to the server
+        out_flo = sock.makefile(mode="wb")
+        dump(class_info, out_flo)
+        out_flo.flush()
 
-            print("sent command: get_overviews")
+        print("sent command: get_overviews")
 
-            # Read in a boolean stating if we were successful
-            in_flo = sock.makefile(mode="rb")
-            success = load(in_flo)
-            in_flo.close()
+        # Read in a boolean stating if we were successful
+        in_flo = sock.makefile(mode="rb")
+        success = load(in_flo)
+        if success:
+            # Read the list of rows from the server
+            classes = load(in_flo)
+        else:
+            raise load(in_flo)
+        in_flo.close()
 
-            in_flo = sock.makefile(mode="rb")
-            if success:
-                # Read the list of rows from the server
-                classes = load(in_flo)
-            else:
-                raise load(in_flo)
-            in_flo.close()
-
-        return classes
-
-    # Server is unavailable
-    except ConnectionRefusedError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "%s: " % argv[0] + str(ex)
-        QMessageBox.information(window, "Server Unavailable", message)
-        return None
-
-    # Database cannot be opened
-    except OperationalError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
-        message += "Please contact the system administrator."
-        QMessageBox.information(window, "Server Error", message)
-        return None
-
-    # Database is corrupted
-    except DatabaseError as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        message = "A server error occurred."
-        message += "Please contact the system administrator."
-        QMessageBox.information(window, "Server Error", message)
-        return None
-
-    # Catch all other exceptions
-    except Exception as ex:
-        print("%s: " % argv[0], ex, file=stderr)
-        exit(1)
+    return classes
 
 
 # Sends the class Id to the server
@@ -220,74 +191,17 @@ def get_detail(class_id, host, port, window):
         exit(1)
 
 
-# 5 rows by 3 columns
-def set_layout(window, host, port):
-    # Function for when the submit button is clicked (or equivalent)
-    def submit_button_slot():
-        class_info = {
-            "dept": dept_edit.text(),
-            "num": num_edit.text(),
-            "area": area_edit.text(),
-            "title": title_edit.text(),
-        }
-
-        list_fill_info = get_overviews(class_info, host, port, window)
-        update_list_widget(list_widget, list_fill_info)
-        add_list_widget(layout, list_widget)
-
-    def fetch_all_classes():
-        class_info = {
-            "dept": "",
-            "num": "",
-            "area": "",
-            "title": "",
-        }
-
-        list_fill_info = get_overviews(class_info, host, port, window)
-        if list_fill_info is not None:
-            list_widget = create_list_widget(list_fill_info)
-            list_widget.activated.connect(list_click_slot)
-            add_list_widget(layout, list_widget)
-            return list_widget
-        return None
-
-    # Function for when a list item is double clicked (or equivalent)
-    def list_click_slot():
-        # Format a class dd to be a string
-        # with no leading or trailing whitespace
-        class_id = list_widget.currentItem().text()
-        if class_id[0] == " ":
-            class_id = str(class_id[1:5])
-        else:
-            class_id = str(class_id[:5])
-
-        #   results = dummy_details
-
-        results = get_detail(class_id, host, port, window)
-        if results is not None:
-            message = format_results(results)
-
-            #   Activate the dialogue box with the appropriate detail
-            QMessageBox.information(window, "Class Details", message)
-
-    # Add a list widget to the layout
-    def add_list_widget(layout, list_widget):
-        layout.addWidget(list_widget, 4, 0, 1, 3)
-
+def create_widgets():
     # Create the layout
     layout = QGridLayout()
 
     layout = add_labels(layout)
 
-    # Create the four input fields & connect them to the submit function
+    # Create the four input fields & connect them to the form input function
     dept_edit = QLineEdit()
-    dept_edit.returnPressed.connect(submit_button_slot)
     num_edit = QLineEdit()
-    num_edit.returnPressed.connect(submit_button_slot)
     area_edit = QLineEdit()
-    area_edit.returnPressed.connect(submit_button_slot)
     title_edit = QLineEdit()
-    title_edit.returnPressed.connect(submit_button_slot)
 
     # Add the line edits to the layout
     layout.addWidget(dept_edit, 0, 1, 1, 1)
@@ -295,17 +209,105 @@ def set_layout(window, host, port):
     layout.addWidget(area_edit, 2, 1, 1, 1)
     layout.addWidget(title_edit, 3, 1, 1, 1)
 
-    # Create the submit button & add it to the layout
-    submit_button = QPushButton("Submit")
-    submit_button.clicked.connect(submit_button_slot)
-    layout.addWidget(submit_button, 0, 2, 4, 1)
+    list_widget = create_list_widget([])
+    add_list_widget(layout, list_widget)
 
-    # Start by filling the list widget with all the classes
-    # (i.e. a query with all empty strings)
-    #  list_fill_info = dummy_rows
-    list_widget = fetch_all_classes()
+    frame = QFrame()
+    frame.setLayout(layout)
 
-    return layout
+    window = QMainWindow()
+    window.setWindowTitle("Princeton University Class Search")
+    window.setCentralWidget(frame)
+    screen_size = QDesktopWidget().screenGeometry()
+    window.resize(screen_size.width() // 2, screen_size.height())
+
+    return (
+        window,
+        dept_edit,
+        num_edit,
+        area_edit,
+        title_edit,
+        list_widget,
+    )
+
+
+class WorkerThread(Thread):
+    def __init__(self, host, port, class_info, window, queue):
+        Thread.__init__(self)
+        self._host = host
+        self._port = port
+        self._class_info = class_info
+        self._window = window
+        self._queue = queue
+        self._should_stop = False
+
+    def stop(self):
+        self._should_stop = True
+
+    def run(self):
+        try:
+            classes = get_overviews(
+                self._class_info, self._host, self._port, self._window
+            )
+            if not self._should_stop:
+                self._queue.put((True, classes))
+
+        # Server is unavailable
+        except ConnectionRefusedError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "%s: " % argv[0] + str(ex)
+            title = "Server Unavailable"
+            if not self._should_stop:
+                self._queue.put((False, (title, message)))
+
+        # Database cannot be opened
+        except OperationalError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "A server error occurred."
+            message += "Please contact the system administrator."
+            title = "Server Unavailable"
+            if not self._should_stop:
+                self._queue.put((False, (title, message)))
+
+        # Database is corrupted
+        except DatabaseError as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            message = "A server error occurred."
+            message += "Please contact the system administrator."
+            title = "Server Unavailable"
+            if not self._should_stop:
+                self._queue.put((False, (title, message)))
+
+        except Exception as ex:
+            print("%s: " % argv[0], ex, file=stderr)
+            title = "Error"
+            if not self._should_stop:
+                self._queue.put((False, (title, str(ex))))
+
+
+def poll_queue_helper(queue, list_widget, window):
+    item = queue.get()
+    while item is not None:
+        list_widget.clear()
+        successful, data = item
+        if successful:
+            classes = data
+            if classes is not None:
+                i = 0
+                for row in classes:
+                    list_widget.insertItem(i, row_to_string(row))
+                    i = i + 1
+        else:
+            title, message = data
+            QMessageBox.information(window, title, message)
+        list_widget.repaint()
+        list_widget.setCurrentRow(0)
+        item = queue.get()
+
+
+# Add a list widget to the layout
+def add_list_widget(layout, list_widget):
+    layout.addWidget(list_widget, 4, 0, 1, 3)
 
 
 # Helper method th add the labels to the layout
@@ -379,19 +381,71 @@ def main():
 
     app = QApplication(argv)
 
-    window = QMainWindow()
+    (
+        window,
+        dept_edit,
+        num_edit,
+        area_edit,
+        title_edit,
+        list_widget,
+    ) = create_widgets()
 
-    # Set the layout
-    layout = set_layout(window, host, port)
-    frame = QFrame()
-    frame.setLayout(layout)
+    queue = SafeQueue()
 
-    window.setWindowTitle("Princeton University Class Search")
-    window.setCentralWidget(frame)
-    screen_size = QDesktopWidget().screenGeometry()
-    window.resize(screen_size.width() // 2, screen_size.height())
+    def poll_queue():
+        poll_queue_helper(queue, list_widget, window)
+
+    timer = QTimer()
+    timer.timeout.connect(poll_queue)
+    timer.setInterval(100)  # milliseconds
+    timer.start()
+
+    worker_thread = None
+    # Function for when data is entered into the form
+    def form_input_slot():
+        nonlocal worker_thread
+        class_info = {
+            "dept": dept_edit.text(),
+            "num": num_edit.text(),
+            "area": area_edit.text(),
+            "title": title_edit.text(),
+        }
+
+        if worker_thread is not None:
+            worker_thread.stop()
+        worker_thread = WorkerThread(
+            host, port, class_info, window, queue
+        )
+        worker_thread.start()
+
+    # Function for when a list item is double clicked (or equivalent)
+    def list_click_slot():
+        # Format a class dd to be a string
+        # with no leading or trailing whitespace
+        class_id = list_widget.currentItem().text()
+        if class_id[0] == " ":
+            class_id = str(class_id[1:5])
+        else:
+            class_id = str(class_id[:5])
+
+        #   results = dummy_details
+
+        results = get_detail(class_id, host, port, window)
+        if results is not None:
+            message = format_results(results)
+
+            #   Activate the dialogue box with the appropriate detail
+            QMessageBox.information(window, "Class Details", message)
+
+    # connect our widgets
+    dept_edit.textChanged.connect(form_input_slot)
+    num_edit.textChanged.connect(form_input_slot)
+    area_edit.textChanged.connect(form_input_slot)
+    title_edit.textChanged.connect(form_input_slot)
+    list_widget.activated.connect(list_click_slot)
 
     window.show()
+    form_input_slot()
     exit(app.exec_())
 
 
