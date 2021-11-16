@@ -298,8 +298,6 @@ def send_error_to_client(ex, sock):
     out_flo.flush()
 
     # Send the data to the client
-    out_flo = sock.makefile(mode="wb")
-    print()
     dump(ex, out_flo)
     out_flo.flush()
 
@@ -322,19 +320,12 @@ def handle_client(sock, delay):
         print("Recieved command: get_detail")
         server_data = get_detail(client_data, sock)
 
-    if server_data is None:
-        # confirm that the server does not have data for the client
-        out_flo = sock.makefile(mode="wb")
-        dump(False, out_flo)
-        out_flo.flush()
-    else:
+    if server_data is not None:
         # confirm that the server does not have data for the client
         out_flo = sock.makefile(mode="wb")
         dump(True, out_flo)
-        out_flo.flush()
 
         # Send an empty array to the client
-        out_flo = sock.makefile(mode="wb")
         dump(server_data, out_flo)
         out_flo.flush()
 
