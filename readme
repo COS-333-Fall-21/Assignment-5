@@ -1,7 +1,7 @@
 abaroody_aziff
 
 Names: Alex Baroody, Adam Ziff
-Assignment: 2
+Assignment: 5
 
 What Alex Baroody contributed to this Assignment:
 I typed during the pair programming of reg.py.
@@ -21,18 +21,18 @@ as well as making lots of constants to avoid hard coding
 numbers.
 
 What Adam Ziff contributed to this Assignment:
-I did the initial creation and setup for reserver.py,
-bringing over the relevant code from Assignment 1. I pair
-programmed with Alex for setting up the GUI in reg.py. I
-also wrote our get_detail() database query in reserver.py
-to match the style detailed in Prof. Dondero’s Ed post,
-turning it from one big query into multiple smaller queries
-and returning a cleaner array of only the data we need
-instead of a massive array of tuples with each db row. I
-helped debug and test both programs, running the reference
-programs while Alex ran our programs and pointed out several
-key distinctions including the need to sort Professors and
-Crosslistings.
+I implemented the consume_cpu_time function in regserver.py
+with the delay command-line argument so we could simulate 
+a slow or unresponsive server. I then changed regserver.py
+to use multiple processes, forking a new process for each 
+request to speed them up. I then removed the submit button
+and pair programmed with Alex for parts 5 and 6 (he typed),
+changing the requests to the server to trigger on text input
+rather than the submit button and implementing threading
+to use multiple processes for the separate requests. We 
+had one lingering bug with a 'ran out of input' error in 
+reg.py, and we worked together in several sessions to debug
+it, ultimately solving it with Prof. Dondero's solution. 
 
 Resources: (NOTE: do we have to cite our own re-used code? do we have to include all the same links from Assignment 1?)
 https://www.delftstack.com/howto/python/stringbuilder-in-python/
