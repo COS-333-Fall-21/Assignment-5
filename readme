@@ -4,6 +4,21 @@ Names: Alex Baroody, Adam Ziff
 Assignment: 5
 
 What Alex Baroody contributed to this Assignment:
+I started by diagnosing and fixing our errors from assignment 2. This included keeping the application running when we ran
+into errors, as well as selecting the first line of the list
+widget on application load. Lastly, I fixed how we built the
+list widget such that we could build a blank widget if any
+errors occured. Once I finished with our problems from
+assignment 2, I moved on to pair programming for parts 5 and
+6 (I typed). This meant adding in worker threads to the client
+such that each request spawned a new thread, reducing front
+end lag. Next, I refactored our code to more closely resemble
+the code from lecture: the structure of our code from assignment
+2 was iffy at best, and the code from lecture provided a good
+template. Lastly, I worked with Adam to solve our 'ran out of
+input' error, which included lots of fruitless googling, a
+trip to office hours, and eventually a successful email to
+Prof. Dondero, who fixed it immediately.
 
 What Adam Ziff contributed to this Assignment:
 I implemented the consume_cpu_time function in regserver.py
@@ -25,7 +40,18 @@ https://www.delftstack.com/howto/python/stringbuilder-in-python/
 https://javahungry.blogspot.com/2021/05/charat-python.html
 https://stackoverflow.com/questions/15561608/detecting-enter-on-a-qlineedit-or-qpushbutton  
 https://stackoverflow.com/questions/3382352/equivalent-of-numpy-argsort-in-basic-python
+Resources used for Assignment 5:
+https://doc.qt.io/qt-5/
 
 Assignment Assessment:
+This assignment was certainly less work than previous
+assignments. It was fun to see our app getting easier and
+easier to use as we progressed, going from unsuable around
+step 2 to very useable around step 6. We appreciated the
+fact that we didn't have to put in as much effort, as the
+work of our project is ramping up.
 
 Time Spent:
+7 hours total
+3 hours of pair programming/debugging/in OH
+1 hour each individually
