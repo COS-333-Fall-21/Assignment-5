@@ -4,6 +4,7 @@ from sqlite3.dbapi2 import DatabaseError, OperationalError
 from sys import exit, argv, stderr
 from socket import socket
 from pickle import load, dump
+from threading import Thread
 from PyQt5.QtWidgets import (
     QApplication,
     QFrame,
@@ -11,7 +12,6 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QGridLayout,
     QDesktopWidget,
-    QPushButton,
     QLineEdit,
     QListWidget,
     QMessageBox,
@@ -19,7 +19,6 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QTimer
 from safequeue import SafeQueue
-from threading import Thread
 
 # Constants for formatting class details
 ID_INDEX = 1
