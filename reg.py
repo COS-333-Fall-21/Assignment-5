@@ -371,9 +371,8 @@ def format_results(result):
 
 
 def main():
-    parsed_args = parse_args(argv)
-    host = parsed_args["host"][0]
-    port = parsed_args["port"][0]
+    host = parse_args(argv)["host"][0]
+    port = parse_args(argv)["port"][0]
 
     app = QApplication(argv)
 
